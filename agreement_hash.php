@@ -29,6 +29,103 @@ $env = parse_ini_file(__DIR__ . '/.env'); // We are picking up the encryption ke
 $encryption_key = $env['ENCRYPTION_KEY'];
 
 try {
+    $pdo = new PDO("mysql:host=127.0.0.1;dbname=sustainability_log", "root", "");
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+    // ...existing code until PDO connection...
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    $searchTerm = $data['searchTerm'] ?? '';
+
+    if ($searchTerm) {
+        // First find matching companies
+        $stmt = $pdo->prepare('
+            SELECT name 
+            FROM users 
+            WHERE name LIKE ?
+        ');
+        $stmt->execute(['%' . $searchTerm . '%']);
+        $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($companies) {
+            // Get agreements for matching companies
+            $stmt = $pdo->prepare('
+                SELECT 
+                    agreement_text,
+                    AES_DECRYPT(files, ?) as decrypted_file,
+                    countersigned_timestamp,
+                    agreement_hash
+                FROM agreements 
+                WHERE company_name LIKE ?
+            ');
+            $stmt->execute([$encryption_key, '%' . $searchTerm . '%']);
+            $agreements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $results = array_map(function ($agreement) {
+                return [
+                    'description' => mb_convert_encoding($agreement['agreement_text'], 'UTF-8', 'ISO-8859-1'),
+                    'files' => base64_encode($agreement['decrypted_file']),
+                    'timestamp' => $agreement['countersigned_timestamp'],
+                    'hash' => $agreement['agreement_hash']
+                ];
+            }, $agreements);
+
+            echo json_encode([
+                'status' => 'success',
+                'agreements' => $results
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'No matching companies found'
+            ]);
+        }
+    } else {
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Search term is required'
+        ]);
+    }
+} catch (PDOException $e) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Database error: ' . $e->getMessage()
+    ]);
+} finally {
+    $pdo = null;
+}
+
+/*
+// Checks the hash in the database, as the user types it - when that matches React displays the agreement text in the UI.
+
+require_once 'session_config.php';
+
+$allowed_origins = [
+    "http://localhost:3000"
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: $origin");
+} else {
+    header("HTTP/1.1 403 Forbidden");
+    exit;
+}
+
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;
+}
+
+$env = parse_ini_file(__DIR__ . '/.env'); // We are picking up the encryption key from .env to dencrypt the agreement text.
+$encryption_key = $env['ENCRYPTION_KEY'];
+
+try {
     $pdo = new PDO("mysql:host=127.0.0.1;dbname=agreement_log", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
@@ -72,3 +169,4 @@ try {
 } finally {
     $pdo = null;
 }
+*/
