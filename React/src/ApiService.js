@@ -44,7 +44,7 @@ export const loginUser = async (formData) => {
   }
 };
 
-// createAgreementFunction() is the API call to send the agreement text submitted by the user to the backend.
+// createAgreementFunction() is the API call to send the agreement text + the file submitted by the user to the backend.
 
 export const createAgreementFunction = async (formData) => {
   try {
@@ -52,19 +52,16 @@ export const createAgreementFunction = async (formData) => {
       "http://localhost:8001/Sustainability_Log_Development/create_agreement.php",
       {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: formData,
         credentials: "include",
       }
     );
 
     const data = await response.json();
-    return {
-      success: true,
-      hash: data.hash,
-    };
+    return data;
   } catch (error) {
-    console.error("Error:", error);
-    throw new Error("An error occurred.");
+    console.error("Error in createAgreementFunction:", error);
+    throw new Error(`Failed to create agreement: ${error.message}`);
   }
 };
 

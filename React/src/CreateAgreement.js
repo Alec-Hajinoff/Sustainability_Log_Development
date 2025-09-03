@@ -1,4 +1,4 @@
-// When a user pastes agreement text into the text box - this is the file that is responsible.
+// When a user inputs text into the text box & uploads a file - this is the file that is responsible.
 
 import React, { useState, useEffect } from "react";
 import "./CreateAgreement.css";
@@ -50,7 +50,7 @@ function CreateAgreement() {
     e.preventDefault();
     setLoading(true);
 
-    const submitData = new FormData();
+    const submitData = new FormData(); // We are combining text and file into payload to be sent to backend - this is not concatenation for hashing.
     submitData.append("agreement_text", formData.agreement_text);
     if (formData.file) {
       submitData.append("file", formData.file);
