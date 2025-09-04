@@ -107,26 +107,26 @@ export const logoutUser = async () => {
   }
 };
 
-// agreementHashFunction() checks the hash in the database, as the user types it, and when that matches displays the agreement text.
+// agreementHashFunction() checks a company's name in the database, as the user types it, and when there is a match displays company data.
 
-export const agreementHashFunction = async (hash) => {
+export const agreementHashFunction = async (searchTerm) => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Agreement_Log_Development/agreement_hash.php",
+      "http://localhost:8001/Sustainability_Log_Development/agreement_hash.php",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ hash }),
+        body: JSON.stringify({ searchTerm }),
       }
     );
 
     const data = await response.json();
     return data;
   } catch (error) {
-    throw new Error("Failed to verify agreement hash");
+    throw new Error("Failed to search for agreements");
   }
 };
 

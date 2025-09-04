@@ -1,6 +1,6 @@
 <?php
 
-// Checks the hash in the database, as the user types it - when that matches React displays the agreement text in the UI.
+// Checks for company name in the database, as the user types it. When there is a match, React displays the company data in the UI.
 
 require_once 'session_config.php';
 
@@ -33,39 +33,29 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
-    // ...existing code until PDO connection...
-
     $data = json_decode(file_get_contents('php://input'), true);
     $searchTerm = $data['searchTerm'] ?? '';
 
     if ($searchTerm) {
-        // First find matching companies
         $stmt = $pdo->prepare('
-            SELECT name 
-            FROM users 
-            WHERE name LIKE ?
+            SELECT 
+                AES_DECRYPT(a.agreement_text, ?) as decrypted_text,
+                a.files,
+                a.countersigned_timestamp,
+                a.agreement_hash
+            FROM agreements a
+            JOIN users u ON a.user_id = u.id
+            WHERE u.name LIKE ?
         ');
-        $stmt->execute(['%' . $searchTerm . '%']);
-        $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($companies) {
-            // Get agreements for matching companies
-            $stmt = $pdo->prepare('
-                SELECT 
-                    agreement_text,
-                    AES_DECRYPT(files, ?) as decrypted_file,
-                    countersigned_timestamp,
-                    agreement_hash
-                FROM agreements 
-                WHERE company_name LIKE ?
-            ');
-            $stmt->execute([$encryption_key, '%' . $searchTerm . '%']);
-            $agreements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([$encryption_key, '%' . $searchTerm . '%']);
+        $agreements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        if ($agreements) {
             $results = array_map(function ($agreement) {
                 return [
-                    'description' => mb_convert_encoding($agreement['agreement_text'], 'UTF-8', 'ISO-8859-1'),
-                    'files' => base64_encode($agreement['decrypted_file']),
+                    'description' => $agreement['decrypted_text'],
+                    'files' => base64_encode($agreement['files']),  // Required for JSON transport.
                     'timestamp' => $agreement['countersigned_timestamp'],
                     'hash' => $agreement['agreement_hash']
                 ];
@@ -78,7 +68,7 @@ try {
         } else {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'No matching companies found'
+                'message' => 'No agreements found for this company'
             ]);
         }
     } else {
@@ -95,78 +85,3 @@ try {
 } finally {
     $pdo = null;
 }
-
-/*
-// Checks the hash in the database, as the user types it - when that matches React displays the agreement text in the UI.
-
-require_once 'session_config.php';
-
-$allowed_origins = [
-    "http://localhost:3000"
-];
-
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-
-if (in_array($origin, $allowed_origins)) {
-    header("Access-Control-Allow-Origin: $origin");
-} else {
-    header("HTTP/1.1 403 Forbidden");
-    exit;
-}
-
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
-
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit;
-}
-
-$env = parse_ini_file(__DIR__ . '/.env'); // We are picking up the encryption key from .env to dencrypt the agreement text.
-$encryption_key = $env['ENCRYPTION_KEY'];
-
-try {
-    $pdo = new PDO("mysql:host=127.0.0.1;dbname=agreement_log", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-    $data = json_decode(file_get_contents('php://input'), true);
-    $hash = $data['hash'] ?? '';
-
-    // The AES_DECRYPT() in the if statement below is a built-in MySQL function for decrypting.
-
-    if ($hash) {
-        $stmt = $pdo->prepare('
-            SELECT AES_DECRYPT(agreement_text, ?) as decrypted_text 
-            FROM agreements 
-            WHERE agreement_hash = ?
-        ');
-        $stmt->execute([$encryption_key, $hash]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($result && $result['decrypted_text']) {
-            echo json_encode([
-                'status' => 'success',
-                'agreementText' => mb_convert_encoding($result['decrypted_text'], 'UTF-8', 'ISO-8859-1')
-            ]);
-        } else {
-            echo json_encode([
-                'status' => 'error',
-                'message' => 'Agreement not found'
-            ]);
-        }
-    } else {
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'Hash is required'
-        ]);
-    }
-} catch (PDOException $e) {
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Database error: ' . $e->getMessage()
-    ]);
-} finally {
-    $pdo = null;
-}
-*/
