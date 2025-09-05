@@ -55,7 +55,7 @@ try {
             $results = array_map(function ($agreement) {
                 return [
                     'description' => $agreement['decrypted_text'],
-                    'files' => base64_encode($agreement['files']),  // Required for JSON transport.
+                    'files' => base64_encode($agreement['files']),  // Converting binary to string, required for JSON transport.
                     'timestamp' => $agreement['countersigned_timestamp'],
                     'hash' => $agreement['agreement_hash']
                 ];
