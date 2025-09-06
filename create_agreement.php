@@ -1,6 +1,6 @@
 <?php
 
-// This file is the database call to send the agreement text + the file submitted by the user to the database.
+// This file is the database call to send the text + the file submitted by the user.
 
 require_once 'session_config.php';
 

@@ -44,7 +44,7 @@ export const loginUser = async (formData) => {
   }
 };
 
-// createAgreementFunction() is the API call to send the agreement text + the file submitted by the user to the backend.
+// createAgreementFunction() is the API call to send to the backend the agreement text + the file submitted by the user.
 
 export const createAgreementFunction = async (formData) => {
   try {
@@ -62,29 +62,6 @@ export const createAgreementFunction = async (formData) => {
   } catch (error) {
     console.error("Error in createAgreementFunction:", error);
     throw new Error(`Failed to create agreement: ${error.message}`);
-  }
-};
-
-// The user clicks 'Countersign' in the UI and counterSigned() sends to the backend a boolean true - the agreement is countersigned, as well as the countersigner's name.
-
-export const counterSigned = async (hash, userName) => {
-  try {
-    const response = await fetch(
-      "http://localhost:8001/Agreement_Log_Development/counter_signed.php",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ hash, signed: true, userName: userName }),
-        credentials: "include",
-      }
-    );
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw new Error("Failed to sign agreement");
   }
 };
 
@@ -107,7 +84,7 @@ export const logoutUser = async () => {
   }
 };
 
-// agreementHashFunction() checks a company's name in the database, as the user types it, and when there is a match displays company data.
+// agreementHashFunction() checks a company's name in the database, as the user types it, and when there is a match fetches company data.
 
 export const agreementHashFunction = async (searchTerm) => {
   try {
@@ -130,7 +107,7 @@ export const agreementHashFunction = async (searchTerm) => {
   }
 };
 
-// This code fetches data from the database to populate the user dashboard tables with created and countersigned agreements.
+// userDashboard() fetches data from the database to populate the company-user dashboard in CreateAgreement.js.
 
 export const userDashboard = async () => {
   try {

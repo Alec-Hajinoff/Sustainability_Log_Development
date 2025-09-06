@@ -5,32 +5,27 @@ function Main() {
   return (
     <div>
       <p>
-        Small businesses often rely on semi-formal agreements with suppliers or
-        customers conducted via email. Our web application serves as a secure
-        and verifiable email agreement log tailored for business users,
-        providing an independent proof of existence and mutual acceptance of
-        these agreements.
+        Sustainability Log is a web application that helps small ethical
+        companies create a self verifiable, timestamped, and easily shareable
+        digital record of their sustainability journey.
       </p>
 
       <p>
-        Users can easily copy an agreement directly from their email and paste
-        it into the application’s submission interface. On submission, the
-        database securely stores the encrypted agreement along with a timestamp,
-        and allows a counter party to electronically countersign the agreement.
+        The aim is not to rate companies but to empower them to build trust
+        through transparency, focusing on the timeline of progress.
       </p>
 
       <p>
-        The agreement hash and timestamp are then also anchored on a public
-        blockchain. Both parties can view all logged agreements, including
-        hashes and timestamps, on a user-friendly dashboard. Importantly, all
-        blockchain verification is transparent and accessible via public
-        explorers.
+        The application allows a company to enter data that is related to its
+        sustainability efforts, the application logs this data to the blockchain
+        by emitting events and provides a publicly accessible timeline of
+        sustainability logs over time, demonstrating the company's efforts on
+        the sustainability journey.
       </p>
 
       <p>
-        This solution delivers a practical, legally mindful approach to
-        agreement logging and countersigning, combining cryptographic hashing,
-        blockchain immutability, and minimal friction.
+        The value is the ability for the company to demonstrate in a verifiable
+        way its sustainability journey to its customers, suppliers, investors.
       </p>
     </div>
   );

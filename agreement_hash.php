@@ -1,6 +1,6 @@
 <?php
 
-// Checks for company name in the database, as the user types it. When there is a match, React displays the company data in the UI.
+// Checks for company name in the database, as the user types it. When there is a match sends company data to the frontend.
 
 require_once 'session_config.php';
 
@@ -68,7 +68,7 @@ try {
         } else {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'No agreements found for this company'
+                'message' => 'No data found for this company'
             ]);
         }
     } else {

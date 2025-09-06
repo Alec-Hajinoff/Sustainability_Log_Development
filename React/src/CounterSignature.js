@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import "./CounterSignature.css";
-import { counterSigned, agreementHashFunction } from "./ApiService";
+import { agreementHashFunction } from "./ApiService";
 
 function CounterSignature() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,7 +17,7 @@ function CounterSignature() {
     if (term.length > 2) {
       // Start searching after 3 characters.
       try {
-        const data = await agreementHashFunction(term);
+        const data = await agreementHashFunction(term); // Checks a company's name in the database and fetches the associated data.
         if (data.status === "success") {
           setAgreements(data.agreements);
           setErrorMessage("");
@@ -67,11 +67,11 @@ function CounterSignature() {
 
   return (
     <div className="container">
-      <div className="form-group row mb-3">
-        <label className="col-sm-4 col-form-label text-end">
+      <div className="form-group row mb-3 text-start">
+        <label className="col-sm-2 col-form-label">
           Search for a company:
         </label>
-        <div className="col-sm-8">
+        <div className="col-sm-10">
           <input
             type="text"
             className="form-control"
