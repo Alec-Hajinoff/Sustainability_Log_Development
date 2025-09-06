@@ -135,7 +135,7 @@ export const agreementHashFunction = async (searchTerm) => {
 export const userDashboard = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Agreement_Log_Development/user_dashboard.php",
+      "http://localhost:8001/Sustainability_Log_Development/user_dashboard.php",
       {
         method: "POST",
         headers: {

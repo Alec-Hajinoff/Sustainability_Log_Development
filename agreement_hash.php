@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
-$env = parse_ini_file(__DIR__ . '/.env'); // We are picking up the encryption key from .env to dencrypt the agreement text.
+$env = parse_ini_file(__DIR__ . '/.env'); // We are picking up the encryption key from .env to decrypt the agreement text.
 $encryption_key = $env['ENCRYPTION_KEY'];
 
 try {
