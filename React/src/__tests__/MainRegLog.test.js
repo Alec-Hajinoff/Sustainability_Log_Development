@@ -11,7 +11,7 @@ describe("MainRegLog Component", () => {
       </Router>
     );
 
-    const mainElement = screen.getByText(/Small businesses often rely/i);
+    const mainElement = screen.getByText(/The aim is not to rate companies but to empower them/i);
     expect(mainElement).toBeInTheDocument();
 
     const registrationText = screen.getByPlaceholderText(/Your full name/i);

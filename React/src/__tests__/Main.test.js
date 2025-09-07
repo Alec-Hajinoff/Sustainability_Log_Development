@@ -9,6 +9,6 @@ test("Main component renders without crashing", () => {
   
   test("Main component contains the correct text", () => {
     render(<Main />);
-    const textElement = screen.getByText(/Small businesses often rely on semi-formal agreements/i);
+    const textElement = screen.getByText(/Sustainability Log is a web application that helps/i);
     expect(textElement).toBeInTheDocument();
   });

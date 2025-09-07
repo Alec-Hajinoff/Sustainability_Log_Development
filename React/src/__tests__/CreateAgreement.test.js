@@ -9,28 +9,34 @@ import {
 import CreateAgreement from "../CreateAgreement";
 import { createAgreementFunction, userDashboard } from "../ApiService";
 
+// Mock API service module
 jest.mock("../ApiService");
 
+// Mock LogoutComponent to avoid rendering it fully
 jest.mock("../LogoutComponent", () => () => <button>Logout</button>);
 
 describe("CreateAgreement Component", () => {
+  // Sample agreements as they are rendered by the component
   const mockAgreements = [
     {
-      agreement_hash: "hash123",
-      counter_signed: false,
+      description: "Installed solar panels",
+      files: "JVBERi0xLjQKJcTl8uXr... (base64)",
+      timestamp: "2025-08-25T10:00:00Z",
+      hash: "hash123",
     },
     {
-      agreement_hash: "hash456",
-      counter_signed: true,
-      countersigner_name: "John Doe",
-      countersigned_timestamp: "2025-08-25 10:00:00",
+      description: "Reduced waste via recyclable packaging",
+      files: "JVBERi0yLjQKJcTl8uXr... (base64)",
+      timestamp: "2025-09-01T09:30:00Z",
+      hash: "hash456",
     },
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // IMPORTANT: component expects { status: "success" }
     userDashboard.mockResolvedValue({
-      success: true,
+      status: "success",
       agreements: mockAgreements,
     });
   });
@@ -38,20 +44,42 @@ describe("CreateAgreement Component", () => {
   it("renders initial form elements correctly", async () => {
     render(<CreateAgreement />);
 
-    expect(screen.getByLabelText(/Step 1:/)).toBeInTheDocument();
-    expect(screen.getByRole("textbox")).toBeInTheDocument();
+    // Textarea labeled by the long example text
     expect(
-      screen.getByRole("button", { name: /Generate hash/i })
+      screen.getByRole("textbox", { name: /For example:/i })
     ).toBeInTheDocument();
+
+    // File input labeled as "Upload a supporting document"
+    expect(
+      screen.getByLabelText(/Upload a supporting document/i)
+    ).toBeInTheDocument();
+
+    // Submit button
+    expect(screen.getByRole("button", { name: /Submit/i })).toBeInTheDocument();
+
+    // Logout button (mocked)
+    expect(screen.getByRole("button", { name: /Logout/i })).toBeInTheDocument();
   });
 
   it("loads and displays agreements from dashboard", async () => {
     render(<CreateAgreement />);
 
     await waitFor(() => {
+      // Descriptions
+      expect(screen.getByText("Installed solar panels")).toBeInTheDocument();
+      expect(
+        screen.getByText("Reduced waste via recyclable packaging")
+      ).toBeInTheDocument();
+
+      // Hashes
       expect(screen.getByText("hash123")).toBeInTheDocument();
       expect(screen.getByText("hash456")).toBeInTheDocument();
-      expect(screen.getByText("John Doe")).toBeInTheDocument();
+
+      // Download buttons exist for rows
+      const downloadButtons = screen.getAllByRole("button", {
+        name: /Download PDF/i,
+      });
+      expect(downloadButtons.length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -74,18 +102,22 @@ describe("CreateAgreement Component", () => {
 
     render(<CreateAgreement />);
 
+    // Enter text
     await act(async () => {
-      fireEvent.change(screen.getByRole("textbox"), {
+      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
         target: { value: "Test agreement text" },
       });
     });
 
+    // Submit the form
     await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: /Generate hash/i }));
+      fireEvent.submit(screen.getByRole("button", { name: /Submit/i }));
     });
 
+    // Hash should display in the alert
     await waitFor(() => {
       expect(screen.getByText(mockHash)).toBeInTheDocument();
+      expect(screen.getByText(/Agreement hash:/i)).toBeInTheDocument();
     });
   });
 
@@ -97,13 +129,13 @@ describe("CreateAgreement Component", () => {
     render(<CreateAgreement />);
 
     await act(async () => {
-      fireEvent.change(screen.getByRole("textbox"), {
+      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
         target: { value: "Test agreement text" },
       });
     });
 
     await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: /Generate hash/i }));
+      fireEvent.submit(screen.getByRole("button", { name: /Submit/i }));
     });
 
     await waitFor(() => {
@@ -120,22 +152,24 @@ describe("CreateAgreement Component", () => {
 
     render(<CreateAgreement />);
 
+    // Initial text + submit to generate hash
     await act(async () => {
-      fireEvent.change(screen.getByRole("textbox"), {
+      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
         target: { value: "Initial text" },
       });
     });
 
     await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: /Generate hash/i }));
+      fireEvent.submit(screen.getByRole("button", { name: /Submit/i }));
     });
 
     await waitFor(() => {
       expect(screen.getByText(mockHash)).toBeInTheDocument();
     });
 
+    // Change text -> should clear hash
     await act(async () => {
-      fireEvent.change(screen.getByRole("textbox"), {
+      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
         target: { value: "New text" },
       });
     });

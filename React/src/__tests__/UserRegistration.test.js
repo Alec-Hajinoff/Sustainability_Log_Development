@@ -76,7 +76,7 @@ describe("UserRegistration", () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8001/Agreement_Log_Development/form_capture.php",
+      "http://localhost:8001/Sustainability_Log_Development/form_capture.php",
       {
         method: "POST",
         headers: {

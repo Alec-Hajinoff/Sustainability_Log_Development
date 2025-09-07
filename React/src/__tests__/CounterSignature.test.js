@@ -7,7 +7,7 @@ import {
   act,
 } from "@testing-library/react";
 import CounterSignature from "../CounterSignature";
-import { counterSigned, agreementHashFunction } from "../ApiService";
+import { agreementHashFunction } from "../ApiService";
 
 jest.mock("../ApiService");
 
@@ -16,174 +16,145 @@ describe("CounterSignature Component", () => {
     jest.clearAllMocks();
   });
 
-  it("renders initial form elements correctly", () => {
+  it("renders initial search input correctly", () => {
     render(<CounterSignature />);
-
-    expect(screen.getByPlaceholderText("Agreement hash")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Your full name")).toBeInTheDocument();
-    expect(screen.getByText("Countersign")).toBeDisabled();
+    expect(screen.getByPlaceholderText("Enter company name")).toBeInTheDocument();
   });
 
-  it("displays agreement text when valid hash is entered", async () => {
-    const mockAgreementText = "Test Agreement Content";
+  it("handles search with more than 2 characters", async () => {
+    const mockAgreements = [
+      {
+        description: "Test Agreement",
+        files: "base64data",
+        timestamp: "2023-01-01T00:00:00Z",
+        hash: "testHash123",
+      },
+    ];
+
     agreementHashFunction.mockResolvedValueOnce({
       status: "success",
-      agreementText: mockAgreementText,
+      agreements: mockAgreements,
     });
 
     render(<CounterSignature />);
 
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Agreement hash"), {
-        target: { value: "validHash123" },
+      fireEvent.change(screen.getByPlaceholderText("Enter company name"), {
+        target: { value: "Test Company" },
       });
     });
 
-    await waitFor(() => {
-      expect(screen.getByText(mockAgreementText)).toBeInTheDocument();
-    });
-    expect(screen.queryByText(/Incorrect hash/)).not.toBeInTheDocument();
+    expect(screen.getByText("Test Agreement")).toBeInTheDocument();
   });
 
-  it("shows error message for invalid hash", async () => {
+  it("shows error message when search fails", async () => {
     agreementHashFunction.mockResolvedValueOnce({
       status: "error",
+      message: "Company not found",
     });
 
     render(<CounterSignature />);
 
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Agreement hash"), {
-        target: { value: "invalidHash" },
+      fireEvent.change(screen.getByPlaceholderText("Enter company name"), {
+        target: { value: "Invalid Company" },
       });
     });
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          "Incorrect hash, please ask the agreement owner for the correct hash"
-        )
-      ).toBeInTheDocument();
-    });
+    expect(screen.getByText("Company not found")).toBeInTheDocument();
   });
 
-  it("enables submit button when agreement text and name are provided", async () => {
+  it("clears results when search term is less than 3 characters", async () => {
+    const mockAgreements = [
+      {
+        description: "Test Agreement",
+        files: "base64data",
+        timestamp: "2023-01-01T00:00:00Z",
+        hash: "testHash123",
+      },
+    ];
+
     agreementHashFunction.mockResolvedValueOnce({
       status: "success",
-      agreementText: "Valid Agreement",
+      agreements: mockAgreements,
     });
 
     render(<CounterSignature />);
 
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Agreement hash"), {
-        target: { value: "validHash123" },
+      fireEvent.change(screen.getByPlaceholderText("Enter company name"), {
+        target: { value: "Test Company" },
       });
     });
+
+    expect(screen.getByText("Test Agreement")).toBeInTheDocument();
 
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Your full name"), {
-        target: { value: "John Doe" },
+      fireEvent.change(screen.getByPlaceholderText("Enter company name"), {
+        target: { value: "Te" },
       });
     });
 
-    await waitFor(() => {
-      expect(screen.getByText("Countersign")).toBeEnabled();
-    });
+    expect(screen.queryByText("Test Agreement")).not.toBeInTheDocument();
   });
 
-  it("handles successful counter signature", async () => {
+  it("handles file download correctly", async () => {
+    const mockAgreements = [
+      {
+        description: "Test Agreement",
+        files: "base64data",
+        timestamp: "2023-01-01T00:00:00Z",
+        hash: "testHash123",
+      },
+    ];
+
     agreementHashFunction.mockResolvedValueOnce({
       status: "success",
-      agreementText: "Valid Agreement",
+      agreements: mockAgreements,
     });
 
-    counterSigned.mockResolvedValueOnce({ success: true });
+    const mockCreateObjectURL = jest.fn();
+    global.URL.createObjectURL = mockCreateObjectURL;
 
     render(<CounterSignature />);
 
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Agreement hash"), {
-        target: { value: "validHash123" },
+      fireEvent.change(screen.getByPlaceholderText("Enter company name"), {
+        target: { value: "Test Company" },
       });
     });
 
-    await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Your full name"), {
-        target: { value: "John Doe" },
-      });
-    });
-
-    await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: "Countersign" }));
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("Thank you, the agreement has been counter-signed!")
-      ).toBeInTheDocument();
-    });
+    const downloadButton = screen.getByText("Download PDF");
+    expect(downloadButton).toBeInTheDocument();
   });
 
-  it("handles counter signature error", async () => {
+  it("displays timestamp and blockchain explorer link when results are present", async () => {
+    const mockAgreements = [
+      {
+        description: "Test Agreement",
+        files: "base64data",
+        timestamp: "2023-01-01T00:00:00Z",
+        hash: "testHash123",
+      },
+    ];
+
     agreementHashFunction.mockResolvedValueOnce({
       status: "success",
-      agreementText: "Valid Agreement",
+      agreements: mockAgreements,
     });
-
-    counterSigned.mockRejectedValueOnce(new Error("Failed to sign agreement"));
 
     render(<CounterSignature />);
 
     await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Agreement hash"), {
-        target: { value: "validHash123" },
+      fireEvent.change(screen.getByPlaceholderText("Enter company name"), {
+        target: { value: "Test Company" },
       });
     });
 
-    await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Your full name"), {
-        target: { value: "John Doe" },
-      });
-    });
+    // Check if timestamp is displayed
+    expect(screen.getByText(/2023/)).toBeInTheDocument();
 
-    await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: "Countersign" }));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText("Failed to sign agreement")).toBeInTheDocument();
-    });
-  });
-
-  it("shows loading state during submission", async () => {
-    agreementHashFunction.mockResolvedValueOnce({
-      status: "success",
-      agreementText: "Valid Agreement",
-    });
-
-    counterSigned.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
-    );
-
-    render(<CounterSignature />);
-
-    await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Agreement hash"), {
-        target: { value: "validHash123" },
-      });
-    });
-
-    await act(async () => {
-      fireEvent.change(screen.getByPlaceholderText("Your full name"), {
-        target: { value: "John Doe" },
-      });
-    });
-
-    fireEvent.submit(screen.getByRole("button", { name: "Countersign" }));
-
-    expect(
-      screen.getByText("Saving your agreement to the blockchain, please wait…")
-    ).toBeInTheDocument();
+    // Check if blockchain explorer link is present
+    expect(screen.getByText(/blockchain explorer/)).toBeInTheDocument();
   });
 });

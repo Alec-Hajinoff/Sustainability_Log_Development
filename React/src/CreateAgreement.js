@@ -105,9 +105,8 @@ function CreateAgreement() {
     <div className="container">
       <div>
         <p>
-          Simply follow the steps below to get your contract countersigned, and
-          the application will log the countersignature and timestamp on the
-          blockchain as independent proof of existence and mutual acceptance.
+          To add a sustainability action or event, type a description in the
+          text box, attach any supporting document, and click Submit.
         </p>
       </div>
       <div className="d-flex justify-content-end mb-3">
@@ -116,8 +115,8 @@ function CreateAgreement() {
       <form onSubmit={handleSubmit}>
         <div className="form-group mb-3">
           <label htmlFor="agreementText">
-            Step 1: Copy the agreement from your email, paste it into the text
-            box below, and click “Generate hash”.
+            For example: ‘We installed solar panels’ or ‘We reduced waste by
+            switching to recyclable packaging.’
           </label>
           <textarea
             id="agreementText"
@@ -132,7 +131,7 @@ function CreateAgreement() {
 
         <div className="form-group mb-3">
           <label htmlFor="fileUpload">
-            Upload supporting document (optional):
+            Upload a supporting document (e.g. an invoice or certificate):
           </label>
           <input
             type="file"
@@ -156,7 +155,7 @@ function CreateAgreement() {
             {errorMessage}
           </div>
           <button type="submit" className="btn btn-secondary" id="loginBtnOne">
-            Generate hash
+            Submit
             <span
               role="status"
               aria-hidden="true"
@@ -167,19 +166,8 @@ function CreateAgreement() {
         </div>
         <div className="form-group mb-3">
           <label>
-            Step 2: Copy the agreement hash above and email it to the other
-            party together with this link:{" "}
-            <a
-              href="http://localhost:3000/CounterSignature"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              http://localhost:3000/CounterSignature
-            </a>{" "}
-            <br /> Ask them to open the link, enter the agreement hash, review
-            the agreement text, and click “Countersign” if they agree. <br />{" "}
-            Once they have countersigned, the agreement will appear as
-            countersigned in the table below.
+            See your full timeline of submissions below, securely anchored to
+            the blockchain:
           </label>
         </div>
       </form>
