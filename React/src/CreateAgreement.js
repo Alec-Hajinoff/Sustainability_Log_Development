@@ -144,7 +144,7 @@ function CreateAgreement() {
         {/* Display hash if available */}
         {textHash && (
           <div className="alert alert-info">
-            <strong>Agreement hash:</strong>
+            <strong>Record hash:</strong>
             <br />
             <code>{textHash}</code>
           </div>
