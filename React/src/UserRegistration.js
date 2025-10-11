@@ -54,7 +54,7 @@ function UserRegistration() {
           value={formData.name}
           onChange={handleChange}
           required
-          placeholder="Your full name"
+          placeholder="Company name"
         />
       </div>
       <div className="form-group">
