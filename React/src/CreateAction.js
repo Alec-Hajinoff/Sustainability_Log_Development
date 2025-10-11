@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import "./CreateAction.css";
 import LogoutComponent from "./LogoutComponent";
-import { createAgreementFunction, userDashboard } from "./ApiService";
+import { createActionFunction, userDashboard } from "./ApiService";
 
 function CreateAction() {
   const [textHash, setTextHash] = useState("");
@@ -58,7 +58,7 @@ function CreateAction() {
     }
 
     try {
-      const data = await createAgreementFunction(submitData);
+      const data = await createActionFunction(submitData);
       if (data.success) {
         setTextHash(data.hash);
       } else {
