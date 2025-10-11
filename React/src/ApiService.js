@@ -84,12 +84,12 @@ export const logoutUser = async () => {
   }
 };
 
-// agreementHashFunction() checks a company's name in the database, as the user types it, and when there is a match fetches company data.
+// companySearchFunction() checks a company's name in the database, as the user types it, and when there is a match fetches company data.
 
-export const agreementHashFunction = async (searchTerm) => {
+export const companySearchFunction = async (searchTerm) => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/agreement_hash.php",
+      "http://localhost:8001/Sustainability_Log_Development/company_search.php",
       {
         method: "POST",
         headers: {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import "./CompanySearch.css";
-import { agreementHashFunction } from "./ApiService";
+import { companySearchFunction } from "./ApiService";
 
 function CompanySearch() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,7 +17,7 @@ function CompanySearch() {
     if (term.length > 2) {
       // Start searching after 3 characters.
       try {
-        const data = await agreementHashFunction(term); // Checks a company's name in the database and fetches the associated data.
+        const data = await companySearchFunction(term); // Checks a company's name in the database and fetches the associated data.
         if (data.status === "success") {
           setAgreements(data.agreements);
           setErrorMessage("");
