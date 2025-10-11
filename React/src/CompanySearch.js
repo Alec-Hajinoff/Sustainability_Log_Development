@@ -1,10 +1,10 @@
 // This file allows a user to search for company name in the UI and see its data.
 
 import React, { useState } from "react";
-import "./CounterSignature.css";
+import "./CompanySearch.css";
 import { agreementHashFunction } from "./ApiService";
 
-function CounterSignature() {
+function CompanySearch() {
   const [searchTerm, setSearchTerm] = useState("");
   const [agreements, setAgreements] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -137,4 +137,4 @@ function CounterSignature() {
   );
 }
 
-export default CounterSignature;
+export default CompanySearch;

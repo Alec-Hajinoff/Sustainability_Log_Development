@@ -9,7 +9,7 @@ import RegisteredPage from "./RegisteredPage";
 import AccountPage from "./AccountPage";
 import CreateAction from "./CreateAction";
 import LogoutComponent from "./LogoutComponent";
-import CounterSignature from "./CounterSignature"; // This is the page that does not require sign in and is used by the counter signer
+import CompanySearch from "./CompanySearch"; // This is the page that does not require sign in and is used by the counter signer
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
           <Route path="AccountPage" element={<AccountPage />} /> 
           <Route path="CreateAction" element={<CreateAction />} />
           <Route path="LogoutComponent" component={LogoutComponent} />
-          <Route path="CounterSignature" element={<CounterSignature />} /> {/*This is the page that does not require sign in and is used by the counter signer*/}
+          <Route path="CompanySearch" element={<CompanySearch />} /> {/*This is the page that does not require sign in and is used by the counter signer*/}
         </Routes>
         <Footer />
       </Router>
