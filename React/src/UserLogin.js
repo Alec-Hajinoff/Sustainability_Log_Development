@@ -26,7 +26,7 @@ function UserLogin() {
     try {
       const data = await loginUser(formData);
       if (data.status === "success") {
-          navigate("/CreateAgreement");
+          navigate("/CreateAction");
       } else {
         setErrorMessage("Sign in failed. Please try again.");
       }

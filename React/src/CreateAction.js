@@ -1,11 +1,11 @@
 // When a user inputs text into the text box & uploads a file - this is the file that is responsible.
 
 import React, { useState, useEffect } from "react";
-import "./CreateAgreement.css";
+import "./CreateAction.css";
 import LogoutComponent from "./LogoutComponent";
 import { createAgreementFunction, userDashboard } from "./ApiService";
 
-function CreateAgreement() {
+function CreateAction() {
   const [textHash, setTextHash] = useState("");
   const [formData, setFormData] = useState({
     agreement_text: "",
@@ -224,4 +224,4 @@ function CreateAgreement() {
   );
 }
 
-export default CreateAgreement;
+export default CreateAction;

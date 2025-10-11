@@ -1,6 +1,6 @@
 <?php
 
-// This file fetches data from the database to populate the company-user dashboard in CreateAgreement.js.
+// This file fetches data from the database to populate the company-user dashboard in CreateAction.js.
 
 require_once 'session_config.php';
 

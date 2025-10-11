@@ -1,6 +1,6 @@
 import React from "react";
 import "./AccountPage.css";
-import CreateAgreement from "./CreateAgreement.js";
+import CreateAction from "./CreateAction.js";
 
 function AccountPage() {
   return (
@@ -12,7 +12,7 @@ function AccountPage() {
             fill in the form below to start your insurance policy. You can save
             your progress and fill in the form in several sittings.
           </p>
-          <CreateAgreement />
+          <CreateAction />
         </div>
       </div>
     </div>

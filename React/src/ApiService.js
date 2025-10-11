@@ -107,7 +107,7 @@ export const agreementHashFunction = async (searchTerm) => {
   }
 };
 
-// userDashboard() fetches data from the database to populate the company-user dashboard in CreateAgreement.js.
+// userDashboard() fetches data from the database to populate the company-user dashboard in CreateAction.js.
 
 export const userDashboard = async () => {
   try {
