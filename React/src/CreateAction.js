@@ -154,6 +154,11 @@ function CreateAction() {
           <div id="error-message" className="error" aria-live="polite">
             {errorMessage}
           </div>
+          {loading && (
+            <div className="alert alert-warning mb-0 me-2">
+              Saving your action to the blockchain, please wait…
+            </div>
+          )}
           <button type="submit" className="btn btn-secondary" id="loginBtnOne">
             Submit
             <span
