@@ -35,10 +35,10 @@ try {
 
     $stmt = $pdo->prepare('
             SELECT 
-                AES_DECRYPT(a.agreement_text, ?) as decrypted_text,
+                AES_DECRYPT(a.action_text, ?) as decrypted_text,
                 a.files,
-                a.countersigned_timestamp,
-                a.agreement_hash
+                a.action_timestamp,
+                a.action_hash
             FROM actions a
             JOIN users u ON a.user_id = u.id
         ');
@@ -51,8 +51,8 @@ try {
             return [
                 'description' => $agreement['decrypted_text'],
                 'files' => base64_encode($agreement['files']),  // Converting binary to string, required for JSON transport.
-                'timestamp' => $agreement['countersigned_timestamp'],
-                'hash' => $agreement['agreement_hash']
+                'timestamp' => $agreement['action_timestamp'],
+                'hash' => $agreement['action_hash']
             ];
         }, $agreements);
 

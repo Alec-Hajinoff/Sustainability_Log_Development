@@ -76,7 +76,7 @@ try {
 
     $agreement_hash = hash('sha256', $hash_content); // This hashes the entire string (text and file).
 
-    $sql = "INSERT INTO actions (agreement_text, agreement_hash, user_id, files, countersigned_timestamp) VALUES (AES_ENCRYPT(?, ?), ?, ?, ?, NOW())";
+    $sql = "INSERT INTO actions (action_text, action_hash, user_id, files, action_timestamp) VALUES (AES_ENCRYPT(?, ?), ?, ?, ?, NOW())";
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         throw new Exception('Failed to prepare agreement insert statement');
@@ -90,7 +90,7 @@ try {
     $stmt->execute();
 
     // Get the timestamp that was just inserted
-    $timestampStmt = $conn->prepare("SELECT UNIX_TIMESTAMP(countersigned_timestamp) as unix_timestamp FROM actions WHERE agreement_hash = ?");
+    $timestampStmt = $conn->prepare("SELECT UNIX_TIMESTAMP(action_timestamp) as unix_timestamp FROM actions WHERE action_hash = ?");
     $timestampStmt->execute([$agreement_hash]);
     $timestamp = $timestampStmt->fetch(PDO::FETCH_ASSOC)['unix_timestamp'];
 
