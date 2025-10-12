@@ -150,12 +150,16 @@ function CreateAction() {
           </div>
         )}
 
-        <div className="d-flex justify-content-end mb-3">
-          <div id="error-message" className="error" aria-live="polite">
+        <div className="d-flex flex-column align-items-end mb-3">
+          <div
+            id="error-message"
+            className={`error${errorMessage ? " mb-2" : ""}`}
+            aria-live="polite"
+          >
             {errorMessage}
           </div>
           {loading && (
-            <div className="alert alert-warning mb-0 me-2">
+            <div className="error mb-2" role="status">
               Saving your action to the blockchain, please wait…
             </div>
           )}
@@ -169,6 +173,7 @@ function CreateAction() {
             ></span>
           </button>
         </div>
+
         <div className="form-group mb-3">
           <label>
             See your full timeline of submissions below, securely anchored to
