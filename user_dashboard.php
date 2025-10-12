@@ -39,7 +39,7 @@ try {
                 a.files,
                 a.countersigned_timestamp,
                 a.agreement_hash
-            FROM agreements a
+            FROM actions a
             JOIN users u ON a.user_id = u.id
         ');
 
@@ -63,7 +63,7 @@ try {
     } else {
         echo json_encode([
             'status' => 'error',
-            'message' => 'No agreements found for this company'
+            'message' => 'No sustainability actions found for this company.'
         ]);
     }
 } catch (PDOException $e) {

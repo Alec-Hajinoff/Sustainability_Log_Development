@@ -43,7 +43,7 @@ try {
                 a.files,
                 a.countersigned_timestamp,
                 a.agreement_hash
-            FROM agreements a
+            FROM actions a
             JOIN users u ON a.user_id = u.id
             WHERE u.name LIKE ?
         ');
