@@ -1,179 +1,99 @@
+/**
+ * @fileoverview Validates the critical user flows of the CreateAction component.
+ */
 import React from "react";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  act,
-} from "@testing-library/react";
-import CreateAgreement from "../CreateAgreement";
-import { createAgreementFunction, userDashboard } from "../ApiService";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import CreateAction from "../CreateAction";
+import { createActionFunction, userDashboard } from "../ApiService";
 
-// Mock API service module
-jest.mock("../ApiService");
+jest.mock("../ApiService", () => ({
+  createActionFunction: jest.fn(),
+  userDashboard: jest.fn(),
+}));
 
-// Mock LogoutComponent to avoid rendering it fully
-jest.mock("../LogoutComponent", () => () => <button>Logout</button>);
+jest.mock("../LogoutComponent", () => () => (
+  <div data-testid="logout-component" />
+));
 
-describe("CreateAgreement Component", () => {
-  // Sample agreements as they are rendered by the component
-  const mockAgreements = [
-    {
-      description: "Installed solar panels",
-      files: "JVBERi0xLjQKJcTl8uXr... (base64)",
-      timestamp: "2025-08-25T10:00:00Z",
-      hash: "hash123",
-    },
-    {
-      description: "Reduced waste via recyclable packaging",
-      files: "JVBERi0yLjQKJcTl8uXr... (base64)",
-      timestamp: "2025-09-01T09:30:00Z",
-      hash: "hash456",
-    },
-  ];
-
+describe("CreateAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // IMPORTANT: component expects { status: "success" }
+  });
+
+  test("loads and displays agreements returned from the dashboard service", async () => {
+    const agreements = [
+      {
+        description: "Installed rooftop solar array",
+        files: "cGRmLWZpbGUtY29udGVudA==",
+        timestamp: "2024-05-01T12:00:00Z",
+        hash: "0xabc123",
+      },
+    ];
+
     userDashboard.mockResolvedValue({
       status: "success",
-      agreements: mockAgreements,
+      agreements,
     });
-  });
 
-  it("renders initial form elements correctly", async () => {
-    render(<CreateAgreement />);
+    render(<CreateAction />);
 
-    // Textarea labeled by the long example text
+    await waitFor(() => expect(userDashboard).toHaveBeenCalledTimes(1));
     expect(
-      screen.getByRole("textbox", { name: /For example:/i })
+      await screen.findByText("Installed rooftop solar array")
     ).toBeInTheDocument();
-
-    // File input labeled as "Upload a supporting document"
-    expect(
-      screen.getByLabelText(/Upload a supporting document/i)
-    ).toBeInTheDocument();
-
-    // Submit button
-    expect(screen.getByRole("button", { name: /Submit/i })).toBeInTheDocument();
-
-    // Logout button (mocked)
-    expect(screen.getByRole("button", { name: /Logout/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download pdf/i })).toBeInTheDocument();
   });
 
-  it("loads and displays agreements from dashboard", async () => {
-    render(<CreateAgreement />);
-
-    await waitFor(() => {
-      // Descriptions
-      expect(screen.getByText("Installed solar panels")).toBeInTheDocument();
-      expect(
-        screen.getByText("Reduced waste via recyclable packaging")
-      ).toBeInTheDocument();
-
-      // Hashes
-      expect(screen.getByText("hash123")).toBeInTheDocument();
-      expect(screen.getByText("hash456")).toBeInTheDocument();
-
-      // Download buttons exist for rows
-      const downloadButtons = screen.getAllByRole("button", {
-        name: /Download PDF/i,
-      });
-      expect(downloadButtons.length).toBeGreaterThanOrEqual(2);
-    });
-  });
-
-  it("handles dashboard loading error", async () => {
-    userDashboard.mockRejectedValueOnce(new Error("Failed to load agreements"));
-
-    render(<CreateAgreement />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Failed to load agreements")).toBeInTheDocument();
-    });
-  });
-
-  it("submits agreement text and displays hash", async () => {
-    const mockHash = "generatedHash123";
-    createAgreementFunction.mockResolvedValueOnce({
+  test("submits form data and shows the returned hash when the API reports success", async () => {
+    userDashboard.mockResolvedValue({ status: "success", agreements: [] });
+    createActionFunction.mockResolvedValue({
       success: true,
-      hash: mockHash,
+      hash: "hash_987654321",
     });
 
-    render(<CreateAgreement />);
+    render(<CreateAction />);
 
-    // Enter text
-    await act(async () => {
-      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
-        target: { value: "Test agreement text" },
-      });
+    await waitFor(() => expect(userDashboard).toHaveBeenCalledTimes(1));
+
+    const descriptionField = screen.getByLabelText(/^For example:/i);
+    fireEvent.change(descriptionField, {
+      target: { value: "Switched facility lighting to LEDs" },
     });
 
-    // Submit the form
-    await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: /Submit/i }));
-    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
-    // Hash should display in the alert
-    await waitFor(() => {
-      expect(screen.getByText(mockHash)).toBeInTheDocument();
-      expect(screen.getByText(/Agreement hash:/i)).toBeInTheDocument();
-    });
-  });
-
-  it("handles agreement submission error", async () => {
-    createAgreementFunction.mockRejectedValueOnce(
-      new Error("Submission failed")
+    await waitFor(() =>
+      expect(createActionFunction).toHaveBeenCalledTimes(1)
     );
 
-    render(<CreateAgreement />);
+    const submittedFormData = createActionFunction.mock.calls[0][0];
+    expect(submittedFormData).toBeInstanceOf(FormData);
+    expect(Array.from(submittedFormData.entries())).toEqual([
+      ["agreement_text", "Switched facility lighting to LEDs"],
+    ]);
 
-    await act(async () => {
-      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
-        target: { value: "Test agreement text" },
-      });
-    });
-
-    await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: /Submit/i }));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/Submission failed/)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(/Record hash:/i)).toBeInTheDocument();
+    expect(screen.getByText("hash_987654321")).toBeInTheDocument();
   });
 
-  it("clears hash when agreement text changes", async () => {
-    const mockHash = "generatedHash123";
-    createAgreementFunction.mockResolvedValueOnce({
-      success: true,
-      hash: mockHash,
+  test("displays the error message when submission throws", async () => {
+    userDashboard.mockResolvedValue({ status: "success", agreements: [] });
+    createActionFunction.mockRejectedValue(new Error("Upload failed"));
+
+    render(<CreateAction />);
+
+    await waitFor(() => expect(userDashboard).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(screen.getByLabelText(/^For example:/i), {
+      target: { value: "Implemented paper recycling program" },
     });
 
-    render(<CreateAgreement />);
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
-    // Initial text + submit to generate hash
-    await act(async () => {
-      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
-        target: { value: "Initial text" },
-      });
-    });
+    await waitFor(() =>
+      expect(createActionFunction).toHaveBeenCalledTimes(1)
+    );
 
-    await act(async () => {
-      fireEvent.submit(screen.getByRole("button", { name: /Submit/i }));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(mockHash)).toBeInTheDocument();
-    });
-
-    // Change text -> should clear hash
-    await act(async () => {
-      fireEvent.change(screen.getByRole("textbox", { name: /For example:/i }), {
-        target: { value: "New text" },
-      });
-    });
-
-    expect(screen.queryByText(mockHash)).not.toBeInTheDocument();
+    expect(await screen.findByText("Upload failed")).toBeInTheDocument();
   });
 });

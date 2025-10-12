@@ -14,7 +14,7 @@ describe("MainRegLog Component", () => {
     const mainElement = screen.getByText(/The aim is not to rate companies but to empower them/i);
     expect(mainElement).toBeInTheDocument();
 
-    const registrationText = screen.getByPlaceholderText(/Your full name/i);
+    const registrationText = screen.getByPlaceholderText(/Company name/i);
     expect(registrationText).toBeInTheDocument();
   });
 });
