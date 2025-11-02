@@ -113,6 +113,20 @@ function CreateAction() {
     }
   };
 
+  const getCategoryLabel = (category) => {
+    const categoryClasses = {
+      Sourcing: "category-sourcing",
+      Operations: "category-operations",
+      Impact: "category-impact",
+    };
+
+    return category ? (
+      <span className={`category-tag ${categoryClasses[category]}`}>
+        [{category.toUpperCase()}]
+      </span>
+    ) : null;
+  };
+
   return (
     <div className="container">
       <div>
@@ -275,7 +289,10 @@ function CreateAction() {
               <tbody>
                 {agreements.map((agreement, index) => (
                   <tr key={index}>
-                    <td>{agreement.description}</td>
+                    <td>
+                      {getCategoryLabel(agreement.category)}
+                      {agreement.description}
+                    </td>
                     <td>
                       <button
                         className="btn btn-link"

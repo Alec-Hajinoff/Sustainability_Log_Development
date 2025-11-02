@@ -1,6 +1,6 @@
 // This file allows a user to search for company name in the UI and see its data.
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./CompanySearch.css";
 import { companySearchFunction } from "./ApiService";
 
@@ -9,6 +9,16 @@ function CompanySearch() {
   const [agreements, setAgreements] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Initialises tooltips
+    const tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.forEach((tooltipTriggerEl) => {
+      new window.bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  }, []);
 
   const handleSearch = async (e) => {
     const term = e.target.value;
@@ -65,12 +75,37 @@ function CompanySearch() {
     }
   };
 
+  const getCategoryLabel = (category) => {
+    const categoryClasses = {
+      Sourcing: "category-sourcing",
+      Operations: "category-operations",
+      Impact: "category-impact",
+    };
+
+    const tooltipTexts = {
+      Sourcing:
+        "How we work with suppliers to reduce environmental impact and improve sustainability",
+      Operations:
+        "The day‑to‑day steps we take inside the company to reduce waste and energy use, and to support employees and communities",
+      Impact:
+        "How our products or services help customers reduce their environmental footprint or deliver positive social outcomes",
+    };
+
+    return category ? (
+      <span
+        className={`category-tag ${categoryClasses[category]}`}
+        data-bs-toggle="tooltip"
+        title={tooltipTexts[category]}
+      >
+        [{category.toUpperCase()}]
+      </span>
+    ) : null;
+  };
+
   return (
     <div className="container">
       <div className="form-group row mb-3 text-start">
-        <label className="col-sm-2 col-form-label">
-          Search for a company:
-        </label>
+        <label className="col-sm-2 col-form-label">Search for a company:</label>
         <div className="col-sm-10">
           <input
             type="text"
@@ -99,7 +134,10 @@ function CompanySearch() {
               <tbody>
                 {agreements.map((agreement, index) => (
                   <tr key={index}>
-                    <td>{agreement.description}</td>
+                    <td>
+                      {getCategoryLabel(agreement.category)}
+                      {agreement.description}
+                    </td>
                     <td>
                       <button
                         className="btn btn-link"
