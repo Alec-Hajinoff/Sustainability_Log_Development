@@ -10,6 +10,7 @@ function CreateAction() {
   const [formData, setFormData] = useState({
     agreement_text: "",
     file: null,
+    category: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,16 @@ function CreateAction() {
       }
     };
     fetchDashboard();
+  }, []);
+
+  useEffect(() => {
+    // Initialises tooltips
+    const tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.forEach((tooltipTriggerEl) => {
+      new window.bootstrap.Tooltip(tooltipTriggerEl);
+    });
   }, []);
 
   const handleChange = (e) => {
@@ -56,6 +67,7 @@ function CreateAction() {
     if (formData.file) {
       submitData.append("file", formData.file);
     }
+    submitData.append("category", formData.category);
 
     try {
       const data = await createActionFunction(submitData);
@@ -141,10 +153,77 @@ function CreateAction() {
           />
         </div>
 
+        <div className="form-group mb-3">
+          <label>Select the category this action relates to:</label>
+          <div>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="category"
+                value="Sourcing"
+                checked={formData.category === "Sourcing"}
+                onChange={handleChange}
+                required
+              />
+              <label className="form-check-label">
+                Sourcing
+                <span
+                  className="ms-1 text-primary fw-bold"
+                  data-bs-toggle="tooltip"
+                  title="Actions taken by your suppliers to improve sustainability (e.g., switching to recycled inputs)"
+                >
+                  ?
+                </span>
+              </label>
+            </div>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="category"
+                value="Operations"
+                checked={formData.category === "Operations"}
+                onChange={handleChange}
+              />
+              <label className="form-check-label">
+                Operations
+                <span
+                  className="ms-1 text-primary fw-bold"
+                  data-bs-toggle="tooltip"
+                  title="Internal company actions like reducing waste, donations, or volunteering"
+                >
+                  ?
+                </span>
+              </label>
+            </div>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="radio"
+                name="category"
+                value="Impact"
+                checked={formData.category === "Impact"}
+                onChange={handleChange}
+              />
+              <label className="form-check-label">
+                Impact
+                <span
+                  className="ms-1 text-primary fw-bold"
+                  data-bs-toggle="tooltip"
+                  title="Your products or services that help customers become more sustainable"
+                >
+                  ?
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         {/* Display hash if available */}
         {textHash && (
           <div className="alert alert-info">
-            <strong>Record hash:</strong>
+            <strong>Your action hash is:</strong>
             <br />
             <code>{textHash}</code>
           </div>
