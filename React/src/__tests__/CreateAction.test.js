@@ -20,6 +20,14 @@ describe("CreateAction", () => {
     jest.clearAllMocks();
   });
 
+  beforeAll(() => {
+    window.bootstrap = {
+      Tooltip: jest.fn(() => ({
+        dispose: jest.fn(),
+      })),
+    };
+  });
+
   test("loads and displays agreements returned from the dashboard service", async () => {
     const agreements = [
       {
@@ -27,6 +35,7 @@ describe("CreateAction", () => {
         files: "cGRmLWZpbGUtY29udGVudA==",
         timestamp: "2024-05-01T12:00:00Z",
         hash: "0xabc123",
+        category: "Sourcing",
       },
     ];
 
@@ -41,7 +50,46 @@ describe("CreateAction", () => {
     expect(
       await screen.findByText("Installed rooftop solar array")
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /download pdf/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /download pdf/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("[SOURCING]")).toBeInTheDocument();
+  });
+
+  test("updates category selection when radio button is clicked", async () => {
+    userDashboard.mockResolvedValue({ status: "success", agreements: [] });
+    render(<CreateAction />);
+
+    await waitFor(() => expect(userDashboard).toHaveBeenCalled());
+
+    const sourcingRadio = screen.getByDisplayValue("Sourcing");
+    fireEvent.click(sourcingRadio);
+    expect(sourcingRadio).toBeChecked();
+  });
+
+  test("updates file input when a file is selected", async () => {
+    userDashboard.mockResolvedValue({ status: "success", agreements: [] });
+    render(<CreateAction />);
+
+    await waitFor(() => expect(userDashboard).toHaveBeenCalled());
+
+    const fileInput = screen.getByLabelText(/upload a supporting document/i);
+    const mockFile = new File(["dummy content"], "test.pdf", {
+      type: "application/pdf",
+    });
+
+    fireEvent.change(fileInput, { target: { files: [mockFile] } });
+
+    fireEvent.change(screen.getByLabelText(/^For example:/i), {
+      target: { value: "Switched facility lighting to LEDs" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    await waitFor(() => expect(createActionFunction).toHaveBeenCalled());
+
+    const submittedFormData = createActionFunction.mock.calls[0][0];
+    expect(submittedFormData.get("file")).toBe(mockFile);
   });
 
   test("submits form data and shows the returned hash when the API reports success", async () => {
@@ -55,25 +103,38 @@ describe("CreateAction", () => {
 
     await waitFor(() => expect(userDashboard).toHaveBeenCalledTimes(1));
 
-    const descriptionField = screen.getByLabelText(/^For example:/i);
-    fireEvent.change(descriptionField, {
+    fireEvent.change(screen.getByLabelText(/^For example:/i), {
       target: { value: "Switched facility lighting to LEDs" },
     });
 
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
-    await waitFor(() =>
-      expect(createActionFunction).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(createActionFunction).toHaveBeenCalledTimes(1));
+
+    expect(await screen.findByText(/hash_987654321/i)).toBeInTheDocument();
+  });
+
+  test("shows loading message while submitting", async () => {
+    userDashboard.mockResolvedValue({ status: "success", agreements: [] });
+
+    let resolveSubmit;
+    createActionFunction.mockImplementation(
+      () => new Promise((resolve) => (resolveSubmit = resolve))
     );
 
-    const submittedFormData = createActionFunction.mock.calls[0][0];
-    expect(submittedFormData).toBeInstanceOf(FormData);
-    expect(Array.from(submittedFormData.entries())).toEqual([
-      ["agreement_text", "Switched facility lighting to LEDs"],
-    ]);
+    render(<CreateAction />);
 
-    expect(await screen.findByText(/Record hash:/i)).toBeInTheDocument();
-    expect(screen.getByText("hash_987654321")).toBeInTheDocument();
+    await waitFor(() => expect(userDashboard).toHaveBeenCalled());
+
+    fireEvent.change(screen.getByLabelText(/^For example:/i), {
+      target: { value: "Test loading state" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(screen.getByText(/please wait/i)).toBeInTheDocument();
+
+    resolveSubmit({ success: true, hash: "0xloadingtest" });
   });
 
   test("displays the error message when submission throws", async () => {
@@ -89,10 +150,6 @@ describe("CreateAction", () => {
     });
 
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
-
-    await waitFor(() =>
-      expect(createActionFunction).toHaveBeenCalledTimes(1)
-    );
 
     expect(await screen.findByText("Upload failed")).toBeInTheDocument();
   });

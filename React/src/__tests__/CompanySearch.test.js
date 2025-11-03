@@ -7,22 +7,26 @@ import { companySearchFunction } from "../ApiService";
 // Mock the ApiService
 jest.mock("../ApiService");
 
+// Prevent tooltip crash in test environment
+beforeAll(() => {
+  window.bootstrap = {
+    Tooltip: jest.fn(() => ({
+      dispose: jest.fn(),
+    })),
+  };
+});
+
 describe("CompanySearch Component", () => {
   beforeEach(() => {
-    // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
   test("renders initial state correctly", () => {
     render(<CompanySearch />);
-
-    // Check if search input is present
     expect(
       screen.getByPlaceholderText("Enter company name")
     ).toBeInTheDocument();
     expect(screen.getByText("Search for a company:")).toBeInTheDocument();
-
-    // Check if table and error message are not present initially
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.queryByText(/error/i)).not.toBeInTheDocument();
   });
@@ -31,12 +35,10 @@ describe("CompanySearch Component", () => {
     render(<CompanySearch />);
     const searchInput = screen.getByPlaceholderText("Enter company name");
 
-    // Type less than 3 characters
     fireEvent.change(searchInput, { target: { value: "ab" } });
     expect(searchInput.value).toBe("ab");
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
 
-    // Type 3 characters
     const mockData = {
       status: "success",
       agreements: [
@@ -45,6 +47,7 @@ describe("CompanySearch Component", () => {
           files: "base64data",
           timestamp: "2023-01-01T00:00:00Z",
           hash: "testhash123",
+          category: "Sourcing",
         },
       ],
     };
@@ -55,6 +58,7 @@ describe("CompanySearch Component", () => {
     await waitFor(() => {
       expect(screen.getByRole("table")).toBeInTheDocument();
       expect(screen.getByText("Test Agreement")).toBeInTheDocument();
+      expect(screen.getByText("[SOURCING]")).toBeInTheDocument();
     });
   });
 
@@ -62,11 +66,6 @@ describe("CompanySearch Component", () => {
     render(<CompanySearch />);
     const searchInput = screen.getByPlaceholderText("Enter company name");
 
-    const mockError = {
-      status: "success", // Component expects status: "success"
-      agreements: [], // Empty array when no agreements found
-      message: "Company not found", // This will be displayed as error
-    };
     companySearchFunction.mockResolvedValue({
       status: "error",
       agreements: [],
@@ -76,12 +75,9 @@ describe("CompanySearch Component", () => {
     fireEvent.change(searchInput, { target: { value: "test" } });
 
     await waitFor(() => {
-      expect(screen.getByText("Company not found")).toBeInTheDocument();
-      // Check for the error message container by its text
-      expect(screen.getByText("Company not found").closest("div")).toHaveClass(
-        "alert",
-        "alert-danger"
-      );
+      const error = screen.getByText("Company not found");
+      expect(error).toBeInTheDocument();
+      expect(error.closest("div")).toHaveClass("alert", "alert-danger");
     });
   });
 
@@ -89,18 +85,14 @@ describe("CompanySearch Component", () => {
     render(<CompanySearch />);
     const searchInput = screen.getByPlaceholderText("Enter company name");
 
-    const errorMessage = "Network error";
-    companySearchFunction.mockRejectedValue(new Error(errorMessage));
+    companySearchFunction.mockRejectedValue(new Error("Network error"));
 
     fireEvent.change(searchInput, { target: { value: "test" } });
 
     await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument();
-      // Check for the error message container by its text
-      expect(screen.getByText(errorMessage).closest("div")).toHaveClass(
-        "alert",
-        "alert-danger"
-      );
+      const error = screen.getByText("Network error");
+      expect(error).toBeInTheDocument();
+      expect(error.closest("div")).toHaveClass("alert", "alert-danger");
     });
   });
 
@@ -114,12 +106,14 @@ describe("CompanySearch Component", () => {
         files: "base64data1",
         timestamp: "2023-01-01T00:00:00Z",
         hash: "hash1",
+        category: "Impact",
       },
       {
         description: "Test Agreement 2",
         files: "base64data2",
         timestamp: "2023-01-02T00:00:00Z",
         hash: "hash2",
+        category: "Operations",
       },
     ];
 
@@ -134,6 +128,8 @@ describe("CompanySearch Component", () => {
       expect(screen.getByText("Test Agreement 1")).toBeInTheDocument();
       expect(screen.getByText("Test Agreement 2")).toBeInTheDocument();
       expect(screen.getAllByText("Download PDF")).toHaveLength(2);
+      expect(screen.getByText("[IMPACT]")).toBeInTheDocument();
+      expect(screen.getByText("[OPERATIONS]")).toBeInTheDocument();
     });
   });
 
@@ -141,7 +137,6 @@ describe("CompanySearch Component", () => {
     render(<CompanySearch />);
     const searchInput = screen.getByPlaceholderText("Enter company name");
 
-    // First search with valid term
     companySearchFunction.mockResolvedValue({
       status: "success",
       agreements: [{ description: "Test Agreement" }],
@@ -153,7 +148,6 @@ describe("CompanySearch Component", () => {
       expect(screen.getByRole("table")).toBeInTheDocument();
     });
 
-    // Clear search
     fireEvent.change(searchInput, { target: { value: "te" } });
 
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
