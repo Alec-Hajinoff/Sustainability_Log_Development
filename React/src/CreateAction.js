@@ -1,9 +1,13 @@
 // When a user inputs text into the text box & uploads a file - this is the file that is responsible.
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./CreateAction.css";
 import LogoutComponent from "./LogoutComponent";
-import { createActionFunction, userDashboard } from "./ApiService";
+import {
+  createActionFunction,
+  userDashboard,
+  searchCompanyNames,
+} from "./ApiService";
 
 function CreateAction() {
   const [textHash, setTextHash] = useState("");
@@ -15,6 +19,13 @@ function CreateAction() {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [agreements, setAgreements] = useState([]);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [mentionStartPos, setMentionStartPos] = useState(null);
+  const [caretPos, setCaretPos] = useState(0);
+  const debounceRef = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -43,11 +54,102 @@ function CreateAction() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const selectionStart = e.target.selectionStart;
+    setCaretPos(selectionStart);
+
     setFormData({
       ...formData,
       [name]: value,
     });
     setTextHash("");
+
+    // only run mention detection for the main textarea field
+    if (name === "agreement_text") {
+      const uptoCaret = value.slice(0, selectionStart);
+      const atIndex = uptoCaret.lastIndexOf("@");
+
+      if (atIndex !== -1) {
+        // get the text following the last '@' up to the caret
+        const query = uptoCaret.slice(atIndex + 1);
+
+        // only proceed if the token has no whitespace (simple mention token)
+        if (/^\S*$/.test(query)) {
+          setMentionStartPos(atIndex);
+          setMentionQuery(query);
+
+          if (query.length >= 3) {
+            fetchSuggestions(query);
+          } else {
+            // hide suggestions until >= 3 chars
+            setSuggestions([]);
+            setShowSuggestions(false);
+          }
+          return;
+        }
+      }
+
+      // no valid mention found
+      setMentionQuery("");
+      setSuggestions([]);
+      setShowSuggestions(false);
+      setMentionStartPos(null);
+    }
+  };
+
+  const fetchSuggestions = async (q) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const data = await searchCompanyNames(q);
+        if (data.status === "success" && data.companies) {
+          setSuggestions(data.companies);
+          setShowSuggestions(true);
+        } else {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } catch (err) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 250);
+  };
+
+  const selectSuggestion = (item) => {
+    // item might be an object with a company name or a plain string
+    const companyName = item.name || "";
+
+    const text = formData.agreement_text;
+    const before = text.slice(0, mentionStartPos); // text before '@'
+    const afterStart =
+      mentionStartPos + 1 + (mentionQuery ? mentionQuery.length : 0);
+    const after = text.slice(afterStart);
+
+    const inserted = "@" + companyName + " ";
+    const newText = before + inserted + after;
+
+    setFormData({
+      ...formData,
+      agreement_text: newText,
+    });
+
+    // close suggestions
+    setShowSuggestions(false);
+    setSuggestions([]);
+    setMentionQuery("");
+    setMentionStartPos(null);
+
+    // restore focus and place caret after inserted company name
+    setTimeout(() => {
+      const ta =
+        textareaRef.current || document.getElementById("agreementText");
+      if (ta) {
+        const newPos = before.length + inserted.length;
+        ta.focus();
+        ta.setSelectionRange(newPos, newPos);
+        setCaretPos(newPos);
+      }
+    }, 0);
   };
 
   const handleFileChange = (e) => {
@@ -144,15 +246,46 @@ function CreateAction() {
             For example: ‘We installed solar panels’ or ‘We reduced waste by
             switching to recyclable packaging.’
           </label>
+
           <textarea
             id="agreementText"
+            ref={textareaRef} // Add the ref
             className="form-control"
             rows="10"
             name="agreement_text"
             value={formData.agreement_text}
             onChange={handleChange}
             required
+            aria-describedby={
+              showSuggestions ? "mention-suggestions" : undefined
+            }
           />
+          {showSuggestions && suggestions.length > 0 && (
+            <ul
+              id="mention-suggestions"
+              className="list-group mention-suggestions"
+              role="listbox"
+              aria-label="Company suggestions"
+            >
+              {suggestions.map((s, idx) => {
+                const label = s.name || "Unknown";
+                return (
+                  <li
+                    key={idx}
+                    className="list-group-item list-group-item-action"
+                    role="option"
+                    aria-selected={false}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      selectSuggestion(s);
+                    }}
+                  >
+                    {label}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
 
         <div className="form-group mb-3">

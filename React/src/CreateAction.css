@@ -1,3 +1,9 @@
+/* Base styles */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+}
+
 input:valid {
   background-color: ivory;
   border: none;
@@ -6,11 +12,7 @@ input:valid {
   accent-color: gold;
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 18px;
-}
-
+/* Layout components */
 .footer {
   background-color: rgb(236, 230, 230);
   border-radius: 7px;
@@ -20,6 +22,7 @@ body {
   height: 150px;
 }
 
+/* Labels and tags */
 .step-label,
 .table-label {
   font-size: 1.1em;
@@ -50,4 +53,47 @@ body {
 .category-impact {
   color: #004085;
   background-color: #cce5ff;
+}
+
+/* Mention suggestions dropdown */
+.form-group {
+  position: relative;
+}
+
+.mention-suggestions {
+  position: absolute;
+  z-index: 1000;
+  width: 100%;
+  max-height: 180px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 2px;
+}
+
+.mention-suggestions .list-group-item {
+  cursor: pointer;
+  border-left: 3px solid #6c757d;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.mention-suggestions .list-group-item::before {
+  content: "→";
+  margin-right: 8px;
+  color: #6c757d;
+}
+
+.mention-suggestions .list-group-item:hover {
+  background-color: #e9ecef;
+  border-left-color: #0d6efd;
+}
+
+.mention-suggestions .list-group-item:not(:last-child) {
+  border-bottom: 1px solid #dee2e6;
 }

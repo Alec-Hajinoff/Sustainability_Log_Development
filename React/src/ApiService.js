@@ -128,3 +128,26 @@ export const userDashboard = async () => {
     throw new Error("Failed to fetch dashboard data");
   }
 };
+
+// searchCompanyNames() fetches company name suggestions for @mentions
+
+export const searchCompanyNames = async (searchTerm) => {
+  try {
+    const response = await fetch(
+      "http://localhost:8001/Sustainability_Log_Development/company_name_search.php",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ searchTerm }),
+      }
+    );
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error("Failed to search for companies");
+  }
+};
