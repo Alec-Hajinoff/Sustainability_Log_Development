@@ -24,7 +24,8 @@ function CreateAction() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mentionStartPos, setMentionStartPos] = useState(null);
   const [caretPos, setCaretPos] = useState(0);
-  const debounceRef = useRef(null);
+  const debounceRef = useRef(null); // useRef doesn't cause a rerender like useState.
+  // With 'const debounceRef = useRef(null);' React gives you an object that looks like: {current: null}
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -54,7 +55,7 @@ function CreateAction() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const selectionStart = e.target.selectionStart;
+    const selectionStart = e.target.selectionStart; // This is where the caret currently is.
     setCaretPos(selectionStart);
 
     setFormData({
@@ -65,14 +66,14 @@ function CreateAction() {
 
     // only run mention detection for the main textarea field
     if (name === "agreement_text") {
-      const uptoCaret = value.slice(0, selectionStart);
-      const atIndex = uptoCaret.lastIndexOf("@");
+      const uptoCaret = value.slice(0, selectionStart); // All the text up to the caret.
+      const atIndex = uptoCaret.lastIndexOf("@"); // Position of most recent @ before the caret.
 
-      if (atIndex !== -1) {
-        // get the text following the last '@' up to the caret
+      if (atIndex !== -1) { // Only proceed if @ is before the caret.
+        // Get the text following the last '@' up to the caret.
         const query = uptoCaret.slice(atIndex + 1);
 
-        // only proceed if the token has no whitespace (simple mention token)
+        // Only proceed if the token has no whitespace (simple mention token).
         if (/^\S*$/.test(query)) {
           setMentionStartPos(atIndex);
           setMentionQuery(query);
@@ -80,7 +81,7 @@ function CreateAction() {
           if (query.length >= 3) {
             fetchSuggestions(query);
           } else {
-            // hide suggestions until >= 3 chars
+            // Hide suggestions until >= 3 chars.
             setSuggestions([]);
             setShowSuggestions(false);
           }
@@ -88,7 +89,7 @@ function CreateAction() {
         }
       }
 
-      // no valid mention found
+      // No valid mention found.
       setMentionQuery("");
       setSuggestions([]);
       setShowSuggestions(false);
@@ -97,10 +98,10 @@ function CreateAction() {
   };
 
   const fetchSuggestions = async (q) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current); // If the timer on typing started, we clear it.
+    debounceRef.current = setTimeout(async () => { // We then reset the timer.
       try {
-        const data = await searchCompanyNames(q);
+        const data = await searchCompanyNames(q); // We then run the function after 250 milliseconds.
         if (data.status === "success" && data.companies) {
           setSuggestions(data.companies);
           setShowSuggestions(true);
@@ -116,11 +117,11 @@ function CreateAction() {
   };
 
   const selectSuggestion = (item) => {
-    // item might be an object with a company name or a plain string
+    // Item might be an object with a company name or a plain string.
     const companyName = item.name || "";
 
     const text = formData.agreement_text;
-    const before = text.slice(0, mentionStartPos); // text before '@'
+    const before = text.slice(0, mentionStartPos); // Text before '@'.
     const afterStart =
       mentionStartPos + 1 + (mentionQuery ? mentionQuery.length : 0);
     const after = text.slice(afterStart);
@@ -133,13 +134,13 @@ function CreateAction() {
       agreement_text: newText,
     });
 
-    // close suggestions
+    // Close suggestions.
     setShowSuggestions(false);
     setSuggestions([]);
     setMentionQuery("");
     setMentionStartPos(null);
 
-    // restore focus and place caret after inserted company name
+    // Restore focus and place caret after inserted company name.
     setTimeout(() => {
       const ta =
         textareaRef.current || document.getElementById("agreementText");
