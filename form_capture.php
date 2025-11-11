@@ -2,7 +2,7 @@
 require_once 'session_config.php';
 
 $allowed_origins = [
-    "http://localhost:3000"
+    'http://localhost:3000'
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -10,30 +10,30 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $allowed_origins)) {
     header("Access-Control-Allow-Origin: $origin");
 } else {
-    header("HTTP/1.1 403 Forbidden");
+    header('HTTP/1.1 403 Forbidden');
     exit;
 }
 
 header('Access-Control-Allow-Credentials: true');
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
-$servername = "127.0.0.1";
-$username = "root";
-$passwordServer = "";
-$dbname = "sustainability_log";
+$servername = '127.0.0.1';
+$username = 'root';
+$passwordServer = '';
+$dbname = 'sustainability_log';
 
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $passwordServer);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 } catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+    die('Connection failed: ' . $e->getMessage());
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
@@ -61,12 +61,18 @@ try {
 
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    $sql = "INSERT INTO users (email, password, name) VALUES (:email, :password, :name)";
+    $slug = strtolower(trim($name));
+    $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+    $slug = preg_replace('/[\s-]+/', '-', $slug);
+    $timelineUrl = 'http://localhost:8001/Sustainability_Log_Development/timeline/' . $slug;
+
+    $sql = 'INSERT INTO users (email, password, name, timeline_url) VALUES (:email, :password, :name, :timeline_url)';
     $stmt = $conn->prepare($sql);
     if ($stmt) {
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $hashedPassword);
         $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':timeline_url', $timelineUrl);
         $stmt->execute();
 
         $conn->commit();
