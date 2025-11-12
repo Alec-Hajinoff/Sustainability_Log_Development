@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once 'session_config.php';
 
-$userId = $_SESSION['user_id'] ?? null;
+$userId = $_SESSION['id'] ?? null;
 
 if (!$userId) {
     echo json_encode([
