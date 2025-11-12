@@ -2,8 +2,6 @@
 
 // This file fetches data from the database to populate the company-user dashboard in CreateAction.js.
 
-require_once 'session_config.php';
-
 $allowed_origins = [
     'http://localhost:3000'
 ];
@@ -12,16 +10,27 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
 if (in_array($origin, $allowed_origins)) {
     header("Access-Control-Allow-Origin: $origin");
+    header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    header('Access-Control-Allow-Credentials: true');
 } else {
     header('HTTP/1.1 403 Forbidden');
     exit;
 }
 
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Access-Control-Allow-Credentials: true');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit;  // Handle preflight request
+}
 
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+require_once 'session_config.php';
+
+$userId = $_SESSION['user_id'] ?? null;
+
+if (!$userId) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'User not authenticated'
+    ]);
     exit;
 }
 
@@ -41,10 +50,10 @@ try {
             a.action_hash,
             a.category
         FROM actions a
-        JOIN users u ON a.user_id = u.id
+        WHERE a.user_id = ?
     ');
+    $stmt->execute([$encryption_key, $userId]);
 
-    $stmt->execute([$encryption_key]);
     $agreements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($agreements) {

@@ -1,0 +1,43 @@
+input:valid {
+  background-color: ivory;
+  border: none;
+  outline: 2px solid deepskyblue;
+  border-radius: 5px;
+  accent-color: gold;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+}
+
+.footer {
+  background-color: rgb(236, 230, 230);
+  border-radius: 7px;
+}
+
+#logo {
+  height: 150px;
+}
+
+.category-tag {
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.category-sourcing {
+  color: #856404;
+  background-color: #fff3cd;
+}
+
+.category-operations {
+  color: #155724;
+  background-color: #d4edda;
+}
+
+.category-impact {
+  color: #004085;
+  background-color: #cce5ff;
+}

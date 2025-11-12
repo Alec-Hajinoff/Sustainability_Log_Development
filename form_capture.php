@@ -64,7 +64,7 @@ try {
     $slug = strtolower(trim($name));
     $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
     $slug = preg_replace('/[\s-]+/', '-', $slug);
-    $timelineUrl = 'http://localhost:8001/Sustainability_Log_Development/timeline/' . $slug;
+    $timelineUrl = 'http://localhost:3000/timeline/' . $slug;
 
     $sql = 'INSERT INTO users (email, password, name, timeline_url) VALUES (:email, :password, :name, :timeline_url)';
     $stmt = $conn->prepare($sql);
