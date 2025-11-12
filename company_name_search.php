@@ -1,6 +1,6 @@
 <?php
 
-// This file suggests organisation names when a user references an organisation as a supplier, for instance, when inputting an action. 
+// This file suggests organisation names when a user references an organisation as a supplier, for instance, when inputting an action.
 
 require_once 'session_config.php';
 

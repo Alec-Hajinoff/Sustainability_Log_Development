@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "./PublicTimeline.css";
 import { fetchTimeline } from "./ApiService";
+import ParseMentions from "./ParseMentions";
+import { fetchCompanyMap } from "./ApiService";
 
 function PublicTimeline() {
   const { slug } = useParams();
@@ -9,6 +11,7 @@ function PublicTimeline() {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [companyName, setCompanyName] = useState("");
+  const [companyMap, setCompanyMap] = useState({});
 
   useEffect(() => {
     // Tooltip setup
@@ -95,6 +98,27 @@ function PublicTimeline() {
     ) : null;
   };
 
+  useEffect(() => {
+    const loadCompanyMap = async () => {
+      try {
+        const data = await fetchCompanyMap();
+        if (data.status === "success") {
+          const map = {};
+          data.companies.forEach((c) => {
+            if (c.name && c.timeline_url) {
+              map[c.name] = c.timeline_url;
+            }
+          });
+          setCompanyMap(map);
+        }
+      } catch (err) {
+        console.error("Failed to load company map", err);
+      }
+    };
+
+    loadCompanyMap();
+  }, []);
+
   return (
     <div className="container">
       <h5 className="text-start mb-4">
@@ -121,7 +145,7 @@ function PublicTimeline() {
                   <tr key={index}>
                     <td>
                       {getCategoryLabel(agreement.category)}
-                      {agreement.description}
+                      {ParseMentions(agreement.description, companyMap)}
                     </td>
                     <td>
                       <button

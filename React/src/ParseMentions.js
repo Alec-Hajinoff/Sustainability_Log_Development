@@ -1,13 +1,11 @@
-// src/ParseMentions.js
 import React from "react";
-
 import "./ParseMentions.css";
 
 function ParseMentions(text, companyMap) {
   const mentionRegex = /@(\w[\w\s\-]*)/g;
 
   return text.split(mentionRegex).map((segment, index) => {
-    // Even indexes are plain text, odd indexes are company names
+    // Even indexes are plain text, odd indexes are company names.
     if (index % 2 === 0) return segment;
 
     const companyName = segment.trim();
@@ -26,7 +24,7 @@ function ParseMentions(text, companyMap) {
         </a>
       );
     } else {
-      return `@${companyName}`; // fallback to plain text if no match
+      return `@${companyName}`; // Fallback to plain text if no match.
     }
   });
 }
