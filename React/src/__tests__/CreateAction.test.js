@@ -2,6 +2,7 @@
  * @fileoverview Validates the critical user flows of the CreateAction component.
  */
 import React from "react";
+import userEvent from "@testing-library/user-event";
 import {
   render,
   screen,
@@ -157,7 +158,6 @@ describe("CreateAction", () => {
   });
 
   test("renders mention suggestions when typing @company", async () => {
-    jest.useFakeTimers();
     userDashboard.mockResolvedValue({ status: "success", agreements: [] });
     searchCompanyNames.mockResolvedValue({
       status: "success",
@@ -167,14 +167,8 @@ describe("CreateAction", () => {
     render(<CreateAction />);
     const textarea = await screen.findByLabelText(/^For example:/i);
 
-    act(() => {
-      fireEvent.change(textarea, {
-        target: { value: "We worked with @Acm" },
-      });
-    });
-
-    act(() => {
-      jest.advanceTimersByTime(300);
+    fireEvent.change(textarea, {
+      target: { value: "We worked with @Acm" },
     });
 
     await waitFor(() => {
@@ -182,12 +176,13 @@ describe("CreateAction", () => {
     });
 
     expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
-
-    jest.useRealTimers();
   });
 
   test("inserts selected mention into textarea", async () => {
-    jest.useFakeTimers();
+    window.getSelection = () => ({
+      removeAllRanges: () => {},
+    });
+
     userDashboard.mockResolvedValue({ status: "success", agreements: [] });
     searchCompanyNames.mockResolvedValue({
       status: "success",
@@ -197,25 +192,24 @@ describe("CreateAction", () => {
     render(<CreateAction />);
     const textarea = await screen.findByLabelText(/^For example:/i);
 
-    act(() => {
-      fireEvent.change(textarea, {
-        target: { value: "We worked with @Acm" },
-      });
+    await userEvent.clear(textarea);
+    await userEvent.type(textarea, "We worked with @Acm");
+
+    await waitFor(() => {
+      expect(searchCompanyNames).toHaveBeenCalledWith("Acm");
     });
 
-    act(() => {
-      jest.advanceTimersByTime(300);
-    });
-
-    const suggestion = await screen.findByText("Acme Corp");
+    const suggestion = await screen.findByText((content, element) =>
+      element?.textContent?.includes("Acme Corp")
+    );
     fireEvent.mouseDown(suggestion);
 
     expect(textarea.value).toContain("@Acme Corp ");
-
-    jest.useRealTimers();
   });
 
   test("triggers file download when clicking download button", async () => {
+    jest.useFakeTimers();
+
     userDashboard.mockResolvedValue({
       status: "success",
       agreements: [
@@ -234,20 +228,28 @@ describe("CreateAction", () => {
     global.URL.createObjectURL = jest.fn(() => "blob:url");
     global.URL.revokeObjectURL = jest.fn();
 
+    const anchor = document.createElement("a");
+    const clickSpy = jest.spyOn(anchor, "click").mockImplementation(() => {});
+    const originalCreateElement = document.createElement;
+
+    jest.spyOn(document, "createElement").mockImplementation((tag) => {
+      return tag === "a" ? anchor : originalCreateElement.call(document, tag);
+    });
+
     render(<CreateAction />);
     const downloadBtn = await screen.findByRole("button", {
       name: /download pdf/i,
     });
-
-    // Spy on anchor creation and click
-    const anchor = document.createElement("a");
-    const clickSpy = jest.spyOn(anchor, "click").mockImplementation(() => {});
-    jest.spyOn(document, "createElement").mockReturnValue(anchor);
-
     fireEvent.click(downloadBtn);
+
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
 
     expect(clickSpy).toHaveBeenCalled();
     expect(global.URL.createObjectURL).toHaveBeenCalled();
     expect(global.URL.revokeObjectURL).toHaveBeenCalled();
+
+    jest.useRealTimers();
   });
 });
