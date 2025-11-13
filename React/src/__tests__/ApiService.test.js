@@ -8,6 +8,9 @@ import {
   logoutUser,
   companySearchFunction,
   userDashboard,
+  searchCompanyNames,
+  fetchTimeline,
+  fetchCompanyMap,
 } from "../ApiService";
 
 describe("ApiService helpers", () => {
@@ -15,7 +18,6 @@ describe("ApiService helpers", () => {
   let consoleErrorSpy;
 
   beforeEach(() => {
-    // Provide a fresh fetch mock for every test so their expectations remain isolated.
     global.fetch = jest.fn();
     consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
   });
@@ -138,7 +140,9 @@ describe("ApiService helpers", () => {
   test("logoutUser throws when backend response is not OK", async () => {
     global.fetch.mockResolvedValue({ ok: false });
 
-    await expect(logoutUser()).rejects.toThrow("An error occurred during logout.");
+    await expect(logoutUser()).rejects.toThrow(
+      "An error occurred during logout."
+    );
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -196,6 +200,89 @@ describe("ApiService helpers", () => {
 
     await expect(userDashboard()).rejects.toThrow(
       "Failed to fetch dashboard data"
+    );
+  });
+
+  test("searchCompanyNames posts search term and returns results", async () => {
+    const mockBody = { suggestions: ["Acme Corp"] };
+
+    global.fetch.mockResolvedValue({
+      json: jest.fn().mockResolvedValue(mockBody),
+    });
+
+    const result = await searchCompanyNames("Acme");
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8001/Sustainability_Log_Development/company_name_search.php",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ searchTerm: "Acme" }),
+      }
+    );
+    expect(result).toEqual(mockBody);
+  });
+
+  test("searchCompanyNames throws on failure", async () => {
+    global.fetch.mockRejectedValue(new Error("Search failed"));
+
+    await expect(searchCompanyNames("Acme")).rejects.toThrow(
+      "Failed to search for companies"
+    );
+  });
+
+  test("fetchTimeline gets timeline data by slug", async () => {
+    const mockBody = { timeline: [] };
+
+    global.fetch.mockResolvedValue({
+      json: jest.fn().mockResolvedValue(mockBody),
+    });
+
+    const result = await fetchTimeline("acme-corp");
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8001/Sustainability_Log_Development/get_timeline.php?slug=acme-corp",
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    );
+    expect(result).toEqual(mockBody);
+  });
+
+  test("fetchTimeline throws on failure", async () => {
+    global.fetch.mockRejectedValue(new Error("Timeline error"));
+
+    await expect(fetchTimeline("acme-corp")).rejects.toThrow(
+      "Failed to load timeline"
+    );
+  });
+
+  test("fetchCompanyMap fetches company URLs", async () => {
+    const mockBody = { urls: { acme: "https://acme.com" } };
+
+    global.fetch.mockResolvedValue({
+      json: jest.fn().mockResolvedValue(mockBody),
+    });
+
+    const result = await fetchCompanyMap();
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8001/Sustainability_Log_Development/get_company_urls.php",
+      {
+        credentials: "include",
+      }
+    );
+    expect(result).toEqual(mockBody);
+  });
+
+  test("fetchCompanyMap throws on failure", async () => {
+    global.fetch.mockRejectedValue(new Error("Map error"));
+
+    await expect(fetchCompanyMap()).rejects.toThrow(
+      "Failed to fetch company URLs"
     );
   });
 });

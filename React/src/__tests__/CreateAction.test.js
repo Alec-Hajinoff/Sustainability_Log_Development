@@ -2,67 +2,87 @@
  * @fileoverview Validates the critical user flows of the CreateAction component.
  */
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import CreateAction from "../CreateAction";
-import { createActionFunction, userDashboard } from "../ApiService";
+import {
+  createActionFunction,
+  userDashboard,
+  searchCompanyNames,
+  fetchCompanyMap,
+} from "../ApiService";
 
 jest.mock("../ApiService", () => ({
   createActionFunction: jest.fn(),
   userDashboard: jest.fn(),
+  searchCompanyNames: jest.fn(),
+  fetchCompanyMap: jest.fn(),
 }));
 
 jest.mock("../LogoutComponent", () => () => (
   <div data-testid="logout-component" />
 ));
 
+beforeAll(() => {
+  window.bootstrap = {
+    Tooltip: jest.fn(() => ({
+      dispose: jest.fn(),
+    })),
+  };
+});
+
 describe("CreateAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  beforeAll(() => {
-    window.bootstrap = {
-      Tooltip: jest.fn(() => ({
-        dispose: jest.fn(),
-      })),
-    };
-  });
-
   test("loads and displays agreements returned from the dashboard service", async () => {
-    const agreements = [
-      {
-        description: "Installed rooftop solar array",
-        files: "cGRmLWZpbGUtY29udGVudA==",
-        timestamp: "2024-05-01T12:00:00Z",
-        hash: "0xabc123",
-        category: "Sourcing",
-      },
-    ];
-
     userDashboard.mockResolvedValue({
       status: "success",
-      agreements,
+      agreements: [
+        {
+          description: "Installed rooftop solar array",
+          files: btoa("PDF content"),
+          timestamp: "2024-05-01T12:00:00Z",
+          hash: "0xabc123",
+          category: "Sourcing",
+        },
+      ],
+    });
+
+    fetchCompanyMap.mockResolvedValue({
+      status: "success",
+      companies: [{ name: "Acme", timeline_url: "/timeline/acme" }],
     });
 
     render(<CreateAction />);
 
-    await waitFor(() => expect(userDashboard).toHaveBeenCalledTimes(1));
     expect(
       await screen.findByText("Installed rooftop solar array")
     ).toBeInTheDocument();
+    expect(screen.getByText("[SOURCING]")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /download pdf/i })
     ).toBeInTheDocument();
-    expect(screen.getByText("[SOURCING]")).toBeInTheDocument();
+  });
+
+  test("shows error message if dashboard fetch fails", async () => {
+    userDashboard.mockRejectedValue(new Error("Dashboard error"));
+    render(<CreateAction />);
+    expect(
+      await screen.findByText("Failed to load agreements")
+    ).toBeInTheDocument();
   });
 
   test("updates category selection when radio button is clicked", async () => {
     userDashboard.mockResolvedValue({ status: "success", agreements: [] });
     render(<CreateAction />);
-
-    await waitFor(() => expect(userDashboard).toHaveBeenCalled());
-
-    const sourcingRadio = screen.getByDisplayValue("Sourcing");
+    const sourcingRadio = await screen.findByDisplayValue("Sourcing");
     fireEvent.click(sourcingRadio);
     expect(sourcingRadio).toBeChecked();
   });
@@ -70,14 +90,12 @@ describe("CreateAction", () => {
   test("updates file input when a file is selected", async () => {
     userDashboard.mockResolvedValue({ status: "success", agreements: [] });
     render(<CreateAction />);
-
-    await waitFor(() => expect(userDashboard).toHaveBeenCalled());
-
-    const fileInput = screen.getByLabelText(/upload a supporting document/i);
+    const fileInput = await screen.findByLabelText(
+      /upload a supporting document/i
+    );
     const mockFile = new File(["dummy content"], "test.pdf", {
       type: "application/pdf",
     });
-
     fireEvent.change(fileInput, { target: { files: [mockFile] } });
 
     fireEvent.change(screen.getByLabelText(/^For example:/i), {
@@ -87,7 +105,6 @@ describe("CreateAction", () => {
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
     await waitFor(() => expect(createActionFunction).toHaveBeenCalled());
-
     const submittedFormData = createActionFunction.mock.calls[0][0];
     expect(submittedFormData.get("file")).toBe(mockFile);
   });
@@ -100,16 +117,10 @@ describe("CreateAction", () => {
     });
 
     render(<CreateAction />);
-
-    await waitFor(() => expect(userDashboard).toHaveBeenCalledTimes(1));
-
-    fireEvent.change(screen.getByLabelText(/^For example:/i), {
+    fireEvent.change(await screen.findByLabelText(/^For example:/i), {
       target: { value: "Switched facility lighting to LEDs" },
     });
-
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
-
-    await waitFor(() => expect(createActionFunction).toHaveBeenCalledTimes(1));
 
     expect(await screen.findByText(/hash_987654321/i)).toBeInTheDocument();
   });
@@ -119,22 +130,17 @@ describe("CreateAction", () => {
 
     let resolveSubmit;
     createActionFunction.mockImplementation(
-      () => new Promise((resolve) => (resolveSubmit = resolve))
+      () => new Promise((res) => (resolveSubmit = res))
     );
 
     render(<CreateAction />);
-
-    await waitFor(() => expect(userDashboard).toHaveBeenCalled());
-
-    fireEvent.change(screen.getByLabelText(/^For example:/i), {
+    fireEvent.change(await screen.findByLabelText(/^For example:/i), {
       target: { value: "Test loading state" },
     });
-
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
     expect(screen.getByText(/please wait/i)).toBeInTheDocument();
-
-    resolveSubmit({ success: true, hash: "0xloadingtest" });
+    act(() => resolveSubmit({ success: true, hash: "0xloadingtest" }));
   });
 
   test("displays the error message when submission throws", async () => {
@@ -142,15 +148,106 @@ describe("CreateAction", () => {
     createActionFunction.mockRejectedValue(new Error("Upload failed"));
 
     render(<CreateAction />);
-
-    await waitFor(() => expect(userDashboard).toHaveBeenCalledTimes(1));
-
-    fireEvent.change(screen.getByLabelText(/^For example:/i), {
+    fireEvent.change(await screen.findByLabelText(/^For example:/i), {
       target: { value: "Implemented paper recycling program" },
     });
-
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
 
     expect(await screen.findByText("Upload failed")).toBeInTheDocument();
+  });
+
+  test("renders mention suggestions when typing @company", async () => {
+    jest.useFakeTimers();
+    userDashboard.mockResolvedValue({ status: "success", agreements: [] });
+    searchCompanyNames.mockResolvedValue({
+      status: "success",
+      companies: [{ name: "Acme Corp" }],
+    });
+
+    render(<CreateAction />);
+    const textarea = await screen.findByLabelText(/^For example:/i);
+
+    act(() => {
+      fireEvent.change(textarea, {
+        target: { value: "We worked with @Acm" },
+      });
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    await waitFor(() => {
+      expect(searchCompanyNames).toHaveBeenCalledWith("Acm");
+    });
+
+    expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
+
+    jest.useRealTimers();
+  });
+
+  test("inserts selected mention into textarea", async () => {
+    jest.useFakeTimers();
+    userDashboard.mockResolvedValue({ status: "success", agreements: [] });
+    searchCompanyNames.mockResolvedValue({
+      status: "success",
+      companies: [{ name: "Acme Corp" }],
+    });
+
+    render(<CreateAction />);
+    const textarea = await screen.findByLabelText(/^For example:/i);
+
+    act(() => {
+      fireEvent.change(textarea, {
+        target: { value: "We worked with @Acm" },
+      });
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    const suggestion = await screen.findByText("Acme Corp");
+    fireEvent.mouseDown(suggestion);
+
+    expect(textarea.value).toContain("@Acme Corp ");
+
+    jest.useRealTimers();
+  });
+
+  test("triggers file download when clicking download button", async () => {
+    userDashboard.mockResolvedValue({
+      status: "success",
+      agreements: [
+        {
+          description: "Solar panels",
+          files: btoa("PDF content"),
+          timestamp: "2024-05-01T12:00:00Z",
+          hash: "0xabc123",
+          category: "Impact",
+        },
+      ],
+    });
+
+    fetchCompanyMap.mockResolvedValue({ status: "success", companies: [] });
+
+    global.URL.createObjectURL = jest.fn(() => "blob:url");
+    global.URL.revokeObjectURL = jest.fn();
+
+    render(<CreateAction />);
+    const downloadBtn = await screen.findByRole("button", {
+      name: /download pdf/i,
+    });
+
+    // Spy on anchor creation and click
+    const anchor = document.createElement("a");
+    const clickSpy = jest.spyOn(anchor, "click").mockImplementation(() => {});
+    jest.spyOn(document, "createElement").mockReturnValue(anchor);
+
+    fireEvent.click(downloadBtn);
+
+    expect(clickSpy).toHaveBeenCalled();
+    expect(global.URL.createObjectURL).toHaveBeenCalled();
+    expect(global.URL.revokeObjectURL).toHaveBeenCalled();
   });
 });

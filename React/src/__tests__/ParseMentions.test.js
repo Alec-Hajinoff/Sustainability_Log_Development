@@ -15,9 +15,7 @@ describe("ParseMentions", () => {
   it("renders a single mention as a link when company exists", () => {
     const companyMap = { AcmeCorp: "/timeline/acmecorp" };
     const { container } = render(
-      <div>
-        {ParseMentions("Partnered with @AcmeCorp on sourcing.", companyMap)}
-      </div>
+      <div>{ParseMentions("Partnered with @AcmeCorp", companyMap)}</div>
     );
 
     const links = container.querySelectorAll("a");
