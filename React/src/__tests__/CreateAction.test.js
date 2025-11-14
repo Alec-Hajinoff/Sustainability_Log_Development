@@ -34,6 +34,16 @@ beforeAll(() => {
   };
 });
 
+beforeAll(() => {
+  Object.defineProperty(window.Document.prototype, "getSelection", {
+    configurable: true,
+    value: () => ({
+      removeAllRanges: () => {},
+      addRange: () => {},
+    }),
+  });
+});
+
 describe("CreateAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -164,14 +174,15 @@ describe("CreateAction", () => {
     render(<CreateAction />);
     const textarea = await screen.findByLabelText(/^For example:/i);
 
-    fireEvent.change(textarea, {
-      target: { value: "We worked with @Acm" },
-    });
+    // Simulate real typing
+    await userEvent.type(textarea, "We worked with @Acm");
 
+    // Wait for debounce + API call
     await waitFor(() => {
       expect(searchCompanyNames).toHaveBeenCalledWith("Acm");
     });
 
+    // Suggestion should appear
     expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
   });
 
@@ -196,9 +207,9 @@ describe("CreateAction", () => {
       expect(searchCompanyNames).toHaveBeenCalledWith("Acm");
     });
 
-    const suggestion = await screen.findByText((content, element) =>
-      element?.textContent?.includes("Acme Corp")
-    );
+    const suggestion = await screen.findByText(/Acme Corp/);
+    fireEvent.mouseDown(suggestion);
+
     fireEvent.mouseDown(suggestion);
 
     expect(textarea.value).toContain("@Acme Corp ");
