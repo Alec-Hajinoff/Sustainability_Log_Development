@@ -9,13 +9,8 @@ function TimelineUrlDisplay({ companyName }) {
     const loadUrl = async () => {
       try {
         const data = await fetchCompanyMap();
-        if (data.status === "success" && data.companies) {
-          const company = data.companies.find((c) => c.name === companyName);
-          if (company && company.timeline_url) {
-            setTimelineUrl(company.timeline_url);
-          } else {
-            setError("No timeline URL found for this company.");
-          }
+        if (data.status === "success" && data.companies?.length > 0) {
+          setTimelineUrl(data.companies[0].timeline_url);
         }
       } catch (err) {
         setError("Failed to fetch timeline URL.");
@@ -27,8 +22,8 @@ function TimelineUrlDisplay({ companyName }) {
   if (!timelineUrl && !error) return null;
 
   return (
-    <div className="alert alert-secondary mb-3">
-      <strong>Your public timeline URL:</strong>{" "}
+    <div className="alert alert-light mb-3">
+      <strong>Your public timeline URL is:</strong>{" "}
       {timelineUrl ? (
         <a href={timelineUrl} target="_blank" rel="noopener noreferrer">
           {timelineUrl}
@@ -37,7 +32,7 @@ function TimelineUrlDisplay({ companyName }) {
         <span className="text-danger">{error}</span>
       )}
       <p className="mb-0 small text-muted">
-        Share this link with customers or embed it on your site.
+        Share this link with anyone who should be able to view your organisation’s sustainability timeline.
       </p>
     </div>
   );

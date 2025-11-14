@@ -441,7 +441,7 @@ function CreateAction() {
             {agreements.length > 0 && (
               <div className="row">
                 <div className="col">
-                  <TimelineUrlDisplay companyName="YourCompanyName" />
+                  <TimelineUrlDisplay />
                   <table className="table">{/* existing table code */}</table>
                   {/* blockchain explorer link */}
                 </div>
