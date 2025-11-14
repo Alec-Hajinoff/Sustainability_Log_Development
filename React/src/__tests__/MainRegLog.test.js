@@ -11,7 +11,7 @@ describe("MainRegLog Component", () => {
       </Router>
     );
 
-    const mainElement = screen.getByText(/The aim is not to rate companies but to empower them/i);
+    const mainElement = screen.getByText(/Sustainability Log is a web application that helps ethical organisations/i);
     expect(mainElement).toBeInTheDocument();
 
     const registrationText = screen.getByPlaceholderText(/Company name/i);
