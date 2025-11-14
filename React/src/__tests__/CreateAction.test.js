@@ -1,6 +1,3 @@
-/**
- * @fileoverview Validates the critical user flows of the CreateAction component.
- */
 import React from "react";
 import userEvent from "@testing-library/user-event";
 import {
