@@ -181,6 +181,7 @@ export const fetchCompanyMap = async () => {
     const response = await fetch(
       "http://localhost:8001/Sustainability_Log_Development/get_company_urls.php",
       {
+        method: "GET",
         credentials: "include",
       }
     );
