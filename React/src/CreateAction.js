@@ -465,18 +465,23 @@ function CreateAction() {
                       {ParseMentions(agreement.description, companyMap)}
                     </td>
                     <td>
-                      <button
-                        className="btn btn-link"
-                        onClick={() =>
-                          handleFileDownload(
-                            agreement.files,
-                            `agreement_${agreement.hash}.pdf`
-                          )
-                        }
-                      >
-                        Download PDF
-                      </button>
+                      {agreement.files ? (
+                        <button
+                          className="btn btn-link"
+                          onClick={() =>
+                            handleFileDownload(
+                              agreement.files,
+                              `agreement_${agreement.hash}.pdf`
+                            )
+                          }
+                        >
+                          Download PDF
+                        </button>
+                      ) : (
+                        <span className="text-muted">No file uploaded</span>
+                      )}
                     </td>
+
                     <td>{new Date(agreement.timestamp).toLocaleString()}</td>
                     <td>{agreement.hash}</td>
                   </tr>
