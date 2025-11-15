@@ -174,7 +174,7 @@ export const fetchTimeline = async (slug) => {
   }
 };
 
-// fetchCompanyMap() fetches URL from the database to make mentions clickable.
+// fetchCompanyMap() fetches URLs from the database to make mentions clickable.
 
 export const fetchCompanyMap = async () => {
   try {
@@ -189,5 +189,23 @@ export const fetchCompanyMap = async () => {
     return data;
   } catch (err) {
     throw new Error("Failed to fetch company URLs");
+  }
+};
+
+// fetchUserTimelineUrl() fetches company URL which is displayed just above the timeline.
+
+export const fetchUserTimelineUrl = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:8001/Sustainability_Log_Development/get_user_company_url.php",
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    throw new Error("Failed to fetch user timeline URL");
   }
 };

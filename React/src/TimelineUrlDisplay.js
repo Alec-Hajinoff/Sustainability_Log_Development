@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { fetchCompanyMap } from "./ApiService";
+import { fetchUserTimelineUrl } from "./ApiService";
 
-function TimelineUrlDisplay({ companyName }) {
+function TimelineUrlDisplay() {
   const [timelineUrl, setTimelineUrl] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     const loadUrl = async () => {
       try {
-        const data = await fetchCompanyMap();
-        if (data.status === "success" && data.companies?.length > 0) {
-          setTimelineUrl(data.companies[0].timeline_url);
+        const data = await fetchUserTimelineUrl();
+        if (data.status === "success" && data.timeline_url) {
+          setTimelineUrl(data.timeline_url);
+        } else {
+          setError("Timeline URL not found.");
         }
       } catch (err) {
         setError("Failed to fetch timeline URL.");
       }
     };
     loadUrl();
-  }, [companyName]);
+  }, []);
 
   if (!timelineUrl && !error) return null;
 
@@ -32,7 +34,8 @@ function TimelineUrlDisplay({ companyName }) {
         <span className="text-danger">{error}</span>
       )}
       <p className="mb-0 small text-muted">
-        Share this link with anyone who should be able to view your organisation’s sustainability timeline.
+        Share this link with anyone who should be able to view your
+        organisation’s sustainability timeline.
       </p>
     </div>
   );
