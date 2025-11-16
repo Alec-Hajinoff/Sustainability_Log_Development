@@ -192,12 +192,12 @@ export const fetchCompanyMap = async () => {
   }
 };
 
-// fetchUserTimelineUrl() fetches company URL which is displayed just above the timeline.
+// fetchUserTimelineUrlQr() fetches company URL which is displayed just above the timeline.
 
-export const fetchUserTimelineUrl = async () => {
+export const fetchUserTimelineUrlQr = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/get_user_company_url.php",
+      "http://localhost:8001/Sustainability_Log_Development/get_user_company_url_qr.php",
       {
         method: "GET",
         credentials: "include",
@@ -206,6 +206,7 @@ export const fetchUserTimelineUrl = async () => {
     const data = await response.json();
     return data;
   } catch (err) {
-    throw new Error("Failed to fetch user timeline URL");
+    throw new Error("Failed to fetch user timeline URL and QR code");
   }
 };
+

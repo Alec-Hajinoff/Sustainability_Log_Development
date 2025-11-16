@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { fetchUserTimelineUrl } from "./ApiService";
+import { fetchUserTimelineUrlQr } from "./ApiService";
+import "./TimelineUrlQrDisplay.css";
 
-function TimelineUrlDisplay() {
+function TimelineUrlQrDisplay() {
   const [timelineUrl, setTimelineUrl] = useState("");
+  const [qrCodePath, setQrCodePath] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadUrl = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchUserTimelineUrl();
+        const data = await fetchUserTimelineUrlQr();
         if (data.status === "success" && data.timeline_url) {
           setTimelineUrl(data.timeline_url);
+          setQrCodePath(data.qr_code);
         } else {
           setError("Timeline URL not found.");
         }
       } catch (err) {
-        setError("Failed to fetch timeline URL.");
+        setError("Failed to fetch timeline URL and QR code.");
       }
     };
-    loadUrl();
+    loadData();
   }, []);
 
   if (!timelineUrl && !error) return null;
@@ -33,12 +36,21 @@ function TimelineUrlDisplay() {
       ) : (
         <span className="text-danger">{error}</span>
       )}
+      {qrCodePath && (
+        <div className="mt-2">
+          <img
+            src={`http://localhost:8001/Sustainability_Log_Development${qrCodePath}`}
+            alt="Timeline QR Code"
+            style={{ maxWidth: "200px", height: "auto" }}
+          />
+        </div>
+      )}
       <p className="mb-0 small text-muted">
-        Share this link with anyone who should be able to view your
+        Share this link or QR code with anyone who should be able to view your
         organisation’s sustainability timeline.
       </p>
     </div>
   );
 }
 
-export default TimelineUrlDisplay;
+export default TimelineUrlQrDisplay;

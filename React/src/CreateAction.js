@@ -11,7 +11,7 @@ import {
 
 import ParseMentions from "./ParseMentions";
 import { fetchCompanyMap } from "./ApiService";
-import TimelineUrlDisplay from "./TimelineUrlDisplay";
+import TimelineUrlDisplay from "./TimelineUrlQrDisplay";
 
 function CreateAction() {
   const [textHash, setTextHash] = useState("");

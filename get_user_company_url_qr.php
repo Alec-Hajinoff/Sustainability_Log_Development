@@ -17,12 +17,16 @@ try {
         PDO::ATTR_EMULATE_PREPARES => false
     ]);
 
-    $stmt = $pdo->prepare('SELECT timeline_url FROM users WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT timeline_url, qr_code FROM users WHERE id = ?');
     $stmt->execute([$_SESSION['id']]);
     $company = $stmt->fetch();
 
     if ($company && $company['timeline_url']) {
-        echo json_encode(['status' => 'success', 'timeline_url' => $company['timeline_url']]);
+        echo json_encode([
+            'status' => 'success',
+            'timeline_url' => $company['timeline_url'],
+            'qr_code' => $company['qr_code']
+        ]);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Timeline URL not found']);
     }
