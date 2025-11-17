@@ -11,6 +11,7 @@ import {
   searchCompanyNames,
   fetchTimeline,
   fetchCompanyMap,
+  fetchUserTimelineUrlQr,
 } from "../ApiService";
 
 describe("ApiService helpers", () => {
@@ -272,10 +273,42 @@ describe("ApiService helpers", () => {
     expect(global.fetch).toHaveBeenCalledWith(
       "http://localhost:8001/Sustainability_Log_Development/get_company_urls.php",
       {
+        method: "GET",
         credentials: "include",
       }
     );
     expect(result).toEqual(mockBody);
+  });
+
+  test("fetchUserTimelineUrlQr fetches timeline URL and QR code", async () => {
+    const mockBody = {
+      status: "success",
+      timeline_url: "https://example.com/timeline",
+      qr_code: "/qr/example.png",
+    };
+
+    global.fetch.mockResolvedValue({
+      json: jest.fn().mockResolvedValue(mockBody),
+    });
+
+    const result = await fetchUserTimelineUrlQr();
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "http://localhost:8001/Sustainability_Log_Development/get_user_company_url_qr.php",
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+    expect(result).toEqual(mockBody);
+  });
+
+  test("fetchUserTimelineUrlQr throws on failure", async () => {
+    global.fetch.mockRejectedValue(new Error("Timeline QR error"));
+
+    await expect(fetchUserTimelineUrlQr()).rejects.toThrow(
+      "Failed to fetch user timeline URL and QR code"
+    );
   });
 
   test("fetchCompanyMap throws on failure", async () => {

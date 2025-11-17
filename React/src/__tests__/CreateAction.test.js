@@ -26,6 +26,11 @@ jest.mock("../LogoutComponent", () => () => (
   <div data-testid="logout-component" />
 ));
 
+// Mock TimelineUrlQrDisplay so we can assert its rendering
+jest.mock("../TimelineUrlQrDisplay", () => () => (
+  <div data-testid="timeline-url-qr-display">TimelineUrlQrDisplay</div>
+));
+
 beforeAll(() => {
   window.bootstrap = {
     Tooltip: jest.fn(() => ({
@@ -78,6 +83,33 @@ describe("CreateAction", () => {
       screen.getByRole("button", { name: /download pdf/i })
     ).toBeInTheDocument();
   });
+
+  test("renders TimelineUrlQrDisplay and timeline label when agreements exist", async () => {
+  userDashboard.mockResolvedValue({
+    status: "success",
+    agreements: [
+      {
+        description: "Solar installation",
+        files: btoa("PDF content"),
+        timestamp: "2024-06-01T12:00:00Z",
+        hash: "0xdef456",
+        category: "Impact",
+      },
+    ],
+  });
+
+  fetchCompanyMap.mockResolvedValue({ status: "success", companies: [] });
+
+  render(<CreateAction />);
+
+  // TimelineUrlQrDisplay should be present
+  expect(await screen.findByTestId("timeline-url-qr-display")).toBeInTheDocument();
+
+  // Timeline label should be present
+  expect(
+    screen.getByText(/See your full timeline of submissions below/i)
+  ).toBeInTheDocument();
+});
 
   test("shows error message if dashboard fetch fails", async () => {
     userDashboard.mockRejectedValue(new Error("Dashboard error"));
