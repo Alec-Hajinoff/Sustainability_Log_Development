@@ -46,7 +46,7 @@ function TimelineUrlQrDisplay() {
         </div>
       )}
       <p className="mb-0 small text-muted">
-        Share this link or QR code with anyone who should be able to view your
+        Share your timeline URL or QR code with anyone who should be able to view your
         organisation’s sustainability timeline.
       </p>
     </div>
