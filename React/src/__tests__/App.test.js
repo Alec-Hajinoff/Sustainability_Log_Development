@@ -39,12 +39,6 @@ describe("App Router", () => {
     expect(screen.getByRole("button", { name: /logout/i })).toBeInTheDocument();
   });
 
-  test("renders CompanySearch at /CompanySearch", () => {
-    window.history.pushState({}, "", "/CompanySearch");
-    render(<App />);
-    expect(screen.getByText(/search for a company/i)).toBeInTheDocument();
-  });
-
   test("renders PublicTimeline at /timeline/:slug", () => {
     window.history.pushState({}, "", "/timeline/acme");
     render(<App />);

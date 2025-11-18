@@ -6,7 +6,6 @@ import {
   loginUser,
   createActionFunction,
   logoutUser,
-  companySearchFunction,
   userDashboard,
   searchCompanyNames,
   fetchTimeline,
@@ -145,35 +144,6 @@ describe("ApiService helpers", () => {
       "An error occurred during logout."
     );
     expect(consoleErrorSpy).toHaveBeenCalled();
-  });
-
-  test("companySearchFunction posts search term and returns results", async () => {
-    const mockBody = { results: [{ id: 1 }] };
-
-    global.fetch.mockResolvedValue({
-      json: jest.fn().mockResolvedValue(mockBody),
-    });
-
-    const result = await companySearchFunction("Acme");
-
-    expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8001/Sustainability_Log_Development/company_search.php",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ searchTerm: "Acme" }),
-      }
-    );
-    expect(result).toEqual(mockBody);
-  });
-
-  test("companySearchFunction rethrows generic search error on failure", async () => {
-    global.fetch.mockRejectedValue(new Error("Timeout"));
-
-    await expect(companySearchFunction("Acme")).rejects.toThrow(
-      "Failed to search for agreements"
-    );
   });
 
   test("userDashboard posts request and returns parsed data", async () => {

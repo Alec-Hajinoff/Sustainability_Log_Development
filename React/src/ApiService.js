@@ -84,29 +84,6 @@ export const logoutUser = async () => {
   }
 };
 
-// companySearchFunction() checks a company's name in the database, as the user types it, and when there is a match fetches company data.
-
-export const companySearchFunction = async (searchTerm) => {
-  try {
-    const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/company_search.php",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ searchTerm }),
-      }
-    );
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw new Error("Failed to search for agreements");
-  }
-};
-
 // userDashboard() fetches data from the database to populate the company-user dashboard in CreateAction.js.
 
 export const userDashboard = async () => {
