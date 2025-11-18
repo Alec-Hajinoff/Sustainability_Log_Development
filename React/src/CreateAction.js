@@ -398,7 +398,7 @@ function CreateAction() {
         {/* Display hash if available */}
         {textHash && (
           <div className="alert alert-info">
-            <strong>Your action hash is:</strong>
+            <strong>The hash for your action is shown below. You can now refresh this page.</strong>
             <br />
             <code>{textHash}</code>
           </div>
