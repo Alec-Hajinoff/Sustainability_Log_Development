@@ -19,3 +19,23 @@ body {
 #logo {
   height: 150px;
 }
+
+.step {
+  margin-bottom: 0.75rem;
+}
+
+.step-1 {
+  margin-left: 0;
+}
+.step-2 {
+  margin-left: 1rem;
+}
+.step-3 {
+  margin-left: 2rem;
+}
+.step-4 {
+  margin-left: 3rem;
+}
+.step-5 {
+  margin-left: 4rem;
+}
