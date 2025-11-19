@@ -9,10 +9,11 @@ function Footer() {
       <div className="row">
         <p className="footer">
           <em>
-            &copy; Copyright 2024 - {currentYear}. All rights reserved. Company
-            address: 4 Bridge Gate, London, N21 2AH, United Kingdom. Email
-            address:<span> </span>
-            <a href="mailto:team@sustainabilitylog.com">team@sustainabilitylog.com</a>
+            &copy; Copyright 2024 - {currentYear}. Company address: 4 Bridge
+            Gate, London, N21 2AH, United Kingdom. Email address:<span> </span>
+            <a href="mailto:team@sustainabilitylog.com">
+              team@sustainabilitylog.com
+            </a>
           </em>
         </p>
       </div>
