@@ -80,7 +80,7 @@ function UserRegistration() {
           onChange={handleChange}
           required
           minLength="8"
-          placeholder="Choose a strong password (minimum 8 characters)"
+          placeholder="Choose a strong password"
         />
       </div>
       <div id="error-message" className="error" aria-live="polite">

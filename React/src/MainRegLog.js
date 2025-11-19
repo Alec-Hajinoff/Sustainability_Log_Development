@@ -8,10 +8,10 @@ function MainRegLog() {
   return (
     <div className="container text-center">
       <div className="row">
-        <div className="col-12 col-md-8">
+        <div className="col-12 col-md-9">
           <Main />
         </div>
-        <div className="col-12 col-md-4">
+        <div className="col-12 col-md-3">
           <p className="footer">New user? Please register:</p>
           <UserRegistration />
           <p className="footer">Existing user? Please login:</p>
