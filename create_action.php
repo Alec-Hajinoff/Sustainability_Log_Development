@@ -96,8 +96,8 @@ try {
     $timestampStmt->execute([$agreement_hash]);
     $timestamp = $timestampStmt->fetch(PDO::FETCH_ASSOC)['unix_timestamp'];
 
-    // Call Express server to write to blockchain
-    $ch = curl_init('http://localhost:8002/call-express');
+    $ch = curl_init('https://agreement-log.fly.dev/call-express');  // Here we are calling the Express server installed on fly.io (see folder fly-deployment in Agreement Log), server.js will call pushOnchain.js to publish the hash on chain.
+    // If the Express server is running locally, call http://localhost:8002/call-express
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
