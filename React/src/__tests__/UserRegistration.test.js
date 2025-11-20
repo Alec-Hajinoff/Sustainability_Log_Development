@@ -7,15 +7,12 @@ import UserRegistration from "../UserRegistration";
 import { registerUser } from "../ApiService";
 import { useNavigate } from "react-router-dom";
 
-// Mock the API layer so we can control success/failure outcomes.
 jest.mock("../ApiService", () => ({
   registerUser: jest.fn(),
 }));
 
-// Reuse a single navigate mock for all tests.
 const mockNavigate = jest.fn();
 
-// Mock react-router's navigation hook while preserving other exports.
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: jest.fn(),
@@ -24,26 +21,22 @@ jest.mock("react-router-dom", () => ({
 describe("UserRegistration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Each test needs the mocked navigate function returned by the hook.
+
     useNavigate.mockReturnValue(mockNavigate);
   });
 
   test("shows an error when the password is shorter than 8 characters", async () => {
     render(<UserRegistration />);
 
-    // Populate required fields with valid values except for the password.
     fireEvent.change(screen.getByPlaceholderText("Company name"), {
       target: { value: "Example Co" },
     });
     fireEvent.change(screen.getByPlaceholderText("Email address"), {
       target: { value: "user@example.com" },
     });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Choose a strong password (minimum 8 characters)"
-      ),
-      { target: { value: "short" } }
-    );
+    fireEvent.change(screen.getByPlaceholderText("Choose a strong password"), {
+      target: { value: "short" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
@@ -58,19 +51,15 @@ describe("UserRegistration", () => {
 
     render(<UserRegistration />);
 
-    // Fill the form with valid values prior to submission.
     fireEvent.change(screen.getByPlaceholderText("Company name"), {
       target: { value: "Example Co" },
     });
     fireEvent.change(screen.getByPlaceholderText("Email address"), {
       target: { value: "user@example.com" },
     });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Choose a strong password (minimum 8 characters)"
-      ),
-      { target: { value: "supersecure" } }
-    );
+    fireEvent.change(screen.getByPlaceholderText("Choose a strong password"), {
+      target: { value: "supersecure" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
@@ -89,19 +78,15 @@ describe("UserRegistration", () => {
 
     render(<UserRegistration />);
 
-    // Populate the form with valid data so the failure comes from the API.
     fireEvent.change(screen.getByPlaceholderText("Company name"), {
       target: { value: "Example Co" },
     });
     fireEvent.change(screen.getByPlaceholderText("Email address"), {
       target: { value: "user@example.com" },
     });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Choose a strong password (minimum 8 characters)"
-      ),
-      { target: { value: "supersecure" } }
-    );
+    fireEvent.change(screen.getByPlaceholderText("Choose a strong password"), {
+      target: { value: "supersecure" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 
@@ -116,19 +101,15 @@ describe("UserRegistration", () => {
 
     render(<UserRegistration />);
 
-    // Provide valid inputs so the thrown error surfaces in the UI.
     fireEvent.change(screen.getByPlaceholderText("Company name"), {
       target: { value: "Example Co" },
     });
     fireEvent.change(screen.getByPlaceholderText("Email address"), {
       target: { value: "user@example.com" },
     });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Choose a strong password (minimum 8 characters)"
-      ),
-      { target: { value: "supersecure" } }
-    );
+    fireEvent.change(screen.getByPlaceholderText("Choose a strong password"), {
+      target: { value: "supersecure" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /register/i }));
 

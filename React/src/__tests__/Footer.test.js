@@ -18,6 +18,14 @@ describe("Footer Component", () => {
       name: /team@sustainabilitylog.com/i,
     });
     expect(emailLink).toBeInTheDocument();
-    expect(emailLink).toHaveAttribute("href", "mailto:team@sustainabilitylog.com");
+    expect(emailLink).toHaveAttribute(
+      "href",
+      "mailto:team@sustainabilitylog.com"
+    );
+
+    const currentYear = new Date().getFullYear();
+    expect(
+      screen.getByText(new RegExp(`Copyright 2024 - ${currentYear}`, "i"))
+    ).toBeInTheDocument();
   });
 });
