@@ -3,7 +3,7 @@
 export const registerUser = async (formData) => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/form_capture.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/form_capture.php",
       {
         method: "POST",
         headers: {
@@ -25,7 +25,7 @@ export const registerUser = async (formData) => {
 export const loginUser = async (formData) => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/login_capture.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/login_capture.php",
       {
         method: "POST",
         headers: {
@@ -49,7 +49,7 @@ export const loginUser = async (formData) => {
 export const createActionFunction = async (formData) => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/create_action.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/create_action.php",
       {
         method: "POST",
         body: formData,
@@ -68,7 +68,7 @@ export const createActionFunction = async (formData) => {
 export const logoutUser = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Climate_Bind_Development/logout_component.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/logout_component.php",
       {
         method: "POST",
         credentials: "include",
@@ -89,7 +89,7 @@ export const logoutUser = async () => {
 export const userDashboard = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/user_dashboard.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/user_dashboard.php",
       {
         method: "POST",
         headers: {
@@ -111,7 +111,7 @@ export const userDashboard = async () => {
 export const searchCompanyNames = async (searchTerm) => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/company_name_search.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/company_name_search.php",
       {
         method: "POST",
         headers: {
@@ -134,7 +134,7 @@ export const searchCompanyNames = async (searchTerm) => {
 export const fetchTimeline = async (slug) => {
   try {
     const response = await fetch(
-      `http://localhost:8001/Sustainability_Log_Development/get_timeline.php?slug=${slug}`,
+      `https://sustainabilitylog.com/Sustainability_Log_Development/get_timeline.php?slug=${slug}`,
       {
         method: "GET",
         headers: {
@@ -156,7 +156,7 @@ export const fetchTimeline = async (slug) => {
 export const fetchCompanyMap = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/get_company_urls.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/get_company_urls.php",
       {
         method: "GET",
         credentials: "include",
@@ -174,7 +174,7 @@ export const fetchCompanyMap = async () => {
 export const fetchUserTimelineUrlQr = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Sustainability_Log_Development/get_user_company_url_qr.php",
+      "https://sustainabilitylog.com/Sustainability_Log_Development/get_user_company_url_qr.php",
       {
         method: "GET",
         credentials: "include",
