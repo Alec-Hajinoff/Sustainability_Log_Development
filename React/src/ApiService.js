@@ -68,7 +68,7 @@ export const createActionFunction = async (formData) => {
 export const logoutUser = async () => {
   try {
     const response = await fetch(
-      "http://localhost:8001/Climate_Bind_Development/logout_component.php",
+      "http://localhost:8001/Sustainability_Log_Development/logout_component.php",
       {
         method: "POST",
         credentials: "include",
