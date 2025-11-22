@@ -6,7 +6,7 @@ $allowed_origins = [
     "https://www.sustainabilitylog.com"
 ];
 
-header('Access-Control-Allow-Origin: http://localhost:3000');
+header('Access-Control-Allow-Origin: https://sustainabilitylog.com');
 header('Access-Control-Allow-Credentials: true');
 header('Content-Type: application/json');
 

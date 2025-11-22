@@ -71,7 +71,7 @@ try {
     $slug = strtolower(trim($name));
     $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
     $slug = preg_replace('/[\s-]+/', '-', $slug);
-    $timelineUrl = 'http://localhost:3000/timeline/' . $slug;
+    $timelineUrl = 'https://sustainabilitylog.com/timeline/' . $slug;
 
     // QR code filename and paths
     $qrFilename = $slug . '.png';
