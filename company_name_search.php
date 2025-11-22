@@ -5,7 +5,8 @@
 require_once 'session_config.php';
 
 $allowed_origins = [
-    'http://localhost:3000'
+    "https://sustainabilitylog.com",
+    "https://www.sustainabilitylog.com"
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -26,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 }
 
 try {
-    $pdo = new PDO('mysql:host=127.0.0.1;dbname=sustainability_log', 'root', '');
+    $pdo = new PDO('mysql:host=localhost;port=3306;dbname=sustainability_log', 'sustainability_log_user', 'sKuuzLPJanW3k6w');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $data = json_decode(file_get_contents('php://input'), true);

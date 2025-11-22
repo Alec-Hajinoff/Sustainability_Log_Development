@@ -5,7 +5,8 @@
 require_once 'session_config.php';
 
 $allowed_origins = [
-    'http://localhost:3000'
+    "https://sustainabilitylog.com",
+    "https://www.sustainabilitylog.com"
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -28,9 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 $env = parse_ini_file(__DIR__ . '/.env');  // We are picking up the encryption key from .env to encrypt the agreement text.
 $encryption_key = $env['ENCRYPTION_KEY'];
 
-$servername = '127.0.0.1';
-$username = 'root';
-$passwordServer = '';
+$servername = 'localhost';
+$username = 'sustainability_log_user';
+$passwordServer = 'sKuuzLPJanW3k6w';
 $dbname = 'sustainability_log';
 
 try {

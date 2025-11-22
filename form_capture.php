@@ -8,7 +8,8 @@ use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
 
 $allowed_origins = [
-    'http://localhost:3000'
+    "https://sustainabilitylog.com",
+    "https://www.sustainabilitylog.com"
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -29,9 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit;
 }
 
-$servername = '127.0.0.1';
-$username = 'root';
-$passwordServer = '';
+$servername = 'localhost';
+$username = 'sustainability_log_user';
+$passwordServer = 'sKuuzLPJanW3k6w';
 $dbname = 'sustainability_log';
 
 try {

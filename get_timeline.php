@@ -3,7 +3,8 @@
 require_once 'session_config.php';
 
 $allowed_origins = [
-    'http://localhost:3000'
+    "https://sustainabilitylog.com",
+    "https://www.sustainabilitylog.com"
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
@@ -30,7 +31,7 @@ $encryption_key = $env['ENCRYPTION_KEY'];
 $slug = $_GET['slug'] ?? '';
 
 try {
-    $pdo = new PDO('mysql:host=127.0.0.1;dbname=sustainability_log', 'root', '');
+    $pdo = new PDO('mysql:host=localhost;port=3306;dbname=sustainability_log', 'sustainability_log_user', 'sKuuzLPJanW3k6w');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
