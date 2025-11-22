@@ -39,7 +39,7 @@ function TimelineUrlQrDisplay() {
       {qrCodePath && (
         <div className="mt-2">
           <img
-            src={`http://localhost:8001/Sustainability_Log_Development${qrCodePath}`}
+            src={`https://sustainabilitylog.com${qrCodePath}`}
             alt="Timeline QR Code"
             style={{ maxWidth: "200px", height: "auto" }}
           />
