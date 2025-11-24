@@ -129,7 +129,7 @@ describe("ApiService helpers", () => {
 
     await expect(logoutUser()).resolves.toBeUndefined();
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:8001/Climate_Bind_Development/logout_component.php",
+      "http://localhost:8001/Sustainability_Log_Development/logout_component.php",
       {
         method: "POST",
         credentials: "include",
@@ -158,7 +158,7 @@ describe("ApiService helpers", () => {
     expect(global.fetch).toHaveBeenCalledWith(
       "http://localhost:8001/Sustainability_Log_Development/user_dashboard.php",
       {
-        method: "POST",
+        method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       }
