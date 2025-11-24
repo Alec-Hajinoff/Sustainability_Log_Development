@@ -91,7 +91,7 @@ export const userDashboard = async () => {
     const response = await fetch(
       "http://localhost:8001/Sustainability_Log_Development/user_dashboard.php",
       {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
@@ -186,4 +186,3 @@ export const fetchUserTimelineUrlQr = async () => {
     throw new Error("Failed to fetch user timeline URL and QR code");
   }
 };
-
